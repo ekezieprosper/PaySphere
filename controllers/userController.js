@@ -10,7 +10,6 @@ require("dotenv").config()
 const sendUniqueID = require("../Emails/userUniqueID")
 const sendEmail = require("../Emails/email")
 const { resetFunc } = require("../Emails/resetPasswordEmail")
-const resendOtpEmail = require("../Emails/resendOTP")
 
 
 exports.signUp_user = async (req, res) => {

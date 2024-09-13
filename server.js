@@ -22,8 +22,8 @@ app.use(depositRouter)
 app.use(transferRouter)
 
 app.get('/', (req, res) => {
-  res.send('Start trading with VERTEX');
-});
+  res.send('Making payments and transactions fast and easy')
+})
 
 app.listen(port, () => {
     console.log(`Server is active on port: ${port}`)
