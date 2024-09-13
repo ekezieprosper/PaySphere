@@ -19,6 +19,10 @@ const adminSchema = new mongoose.Schema({
         type: String, required: true
     },
 
+    pin: {
+        type: String
+    },
+
     admin: { 
         type: Boolean,
         default: true

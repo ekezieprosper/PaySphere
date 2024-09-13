@@ -13,10 +13,9 @@ const createdOn = `${date} ${hour}:${minute} ${period}`
 
 
 const transferSchema = new mongoose.Schema({
-    senderId: { 
+    sender:{ 
         type: mongoose.Schema.Types.ObjectId, 
-        ref: 'users', 
-        required: true 
+        ref: 'users'
     },
 
     recipientId: {
@@ -24,9 +23,16 @@ const transferSchema = new mongoose.Schema({
         required: true 
     },
 
-    amount: { 
+    acctNUmber: { 
+        type: String, 
+    },
+
+    bank:{ 
+        type: String, 
+    },
+
+    amount:{ 
         type: Number, 
-        required: true 
     },
 
     status:{ type: String,

@@ -65,6 +65,11 @@ const userSchema = new mongoose.Schema({
         ref: 'notification'
     }],
 
+    histories: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'historyModel'
+    }],
+
     createdOn: {
         type: String,
         default: createdOn
