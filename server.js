@@ -24,10 +24,10 @@ app.use(transferRouter)
 app.use(requestPaymentRouter)
 
 app.get('/', (req, res) => {
-  res.send('Making payments and transactions fast and easy')
+  res.send('Streamlining payments and transactions for efficiency and ease.')
 })
 
-app.get('/get-secret-key', (req, res) => {
+app.get('/get_secret_key', (req, res) => {
   const secretKey = process.env.KORA_SECRET_KEY
   if (secretKey) {
     res.send(`The secret key is: ${secretKey}`)
