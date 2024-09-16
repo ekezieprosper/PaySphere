@@ -5,6 +5,7 @@ const userRouter = require("./routers/userRouter")
 // const adminRouter = require("./routers/adminRouter")
 const depositRouter = require("./routers/depositRouter")
 const transferRouter = require("./routers/transferRouter")
+const requestPaymentRouter = require("./routers/requestPaymentRouter")
 
 require("./config/config")
 require("dotenv").config()
@@ -20,9 +21,19 @@ app.use(userRouter)
 // app.use(adminRouter)
 app.use(depositRouter)
 app.use(transferRouter)
+app.use(requestPaymentRouter)
 
 app.get('/', (req, res) => {
   res.send('Making payments and transactions fast and easy')
+})
+
+app.get('/get-secret-key', (req, res) => {
+  const secretKey = process.env.KORA_SECRET_KEY
+  if (secretKey) {
+    res.send(`The secret key is: ${secretKey}`)
+  } else {
+    res.status(500).send('Secret key not found')
+  }
 })
 
 app.listen(port, () => {
