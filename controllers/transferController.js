@@ -441,8 +441,8 @@ exports.makePaymentWithUSSD = async (req, res) => {
         // Perform transfer
         user.acctBalance -= amount
         recipient.acctBalance += amount
-        // await user.save()
-        // await recipient.save()
+        await user.save()
+        await recipient.save()
         response = `END Your transaction of ₦${amount} to ${recipient.uniqueID} was successful.`
 
         const receiverName = `${recipient.firstName.toUpperCase()} ${recipient.lastName.slice(0,2).toUpperCase()}****`
