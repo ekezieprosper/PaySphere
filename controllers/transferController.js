@@ -449,11 +449,10 @@ exports.makePaymentWithUSSD = async (req, res) => {
             response = `END Invalid option.`
         }
 
-        // Set Content-Type to text/plain
+        // Set Content-Type to text/plain & response
         res.set('Content-Type', 'text/plain')
-        
-        // Send response to Africa's Talking
         res.send(response)
+
     } catch (error) {
         console.error('USSD Error:', error.stack || error)
         res.status(500).send('END An error occurred. Please try again later.')
