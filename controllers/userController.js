@@ -14,14 +14,7 @@ const { resetFunc } = require("../Emails/resetPasswordEmail")
 
 exports.signUp_user = async (req, res) => {
     try {
-      const { Username, email, countryCode, phoneNumber, password, confirmPassword } = req.body
-  
-      const searchUsername = await userModel.findOne({ Username })
-      if (searchUsername) {
-        return res.status(403).json({
-          error: `${Username} is already taken.`
-        })
-      }
+      const { firstName, lastName, email, countryCode, phoneNumber, password, confirmPassword } = req.body
   
       // Phone number validation
       if (!phoneNumber || !countryCode) {
@@ -63,13 +56,13 @@ exports.signUp_user = async (req, res) => {
       const hashPassword = bcrypt.hashSync(password, salt)
   
       // Generate a unique ID for the user
-      const trimmedUsername = Username.slice(1, -1)
-      const shortenedUsername = trimmedUsername.slice(1, 5)
-      const uniqueID = `${shortenedUsername}${Math.floor(Math.random() * 1000000)}`.padStart(6, '0')
+      const trimmedUserName = firstName.slice(0, 4)
+      const uniqueID = `${trimmedUserName.toLowerCase()}${Math.floor(Math.random() * 1000000)}`.padStart(6, '0')
   
       // Create the user in the database
       const user = await userModel.create({
-        Username: Username.toLowerCase(),
+        firstName:firstName.toLowerCase().charAt(0).toUpperCase() + firstName.slice(1),
+        lastName:lastName.toLowerCase().charAt(0).toUpperCase() + lastName.slice(1),
         phoneNumber: PhoneNumber,
         password: hashPassword,
         uniqueID,
@@ -131,7 +124,8 @@ exports.logIn = async (req, res) => {
       // Generate a token for the user
       const token = jwt.sign({
         userId: user._id,
-        Username: user.Username
+        firstName: user.firstName, 
+        lastName: user.lastName
     }, process.env.jwtkey, { expiresIn: '2d' })
 
   
@@ -205,7 +199,8 @@ exports.logOut = async (req, res) => {
 
         const expiredToken = jwt.sign({
             userId: user._id,
-            userName: user.Username
+            firstName: user.firstName, 
+            lastName: user.lastName
         }, process.env.jwtkey, { expiresIn: '1sec' })
 
         res.status(200).json({
@@ -386,13 +381,13 @@ exports.forgotPassword = async (req, res) => {
         })
 
         // Send email with OTP and verification link
-        const userName = user.Username
+        const name = `${user.firstName.toUpperCase()} ${user.lastName.slice(0,2).toUpperCase()}****`
         const Email = user.email
         const subject = `${otp} is your account recovery code`
         const verificationLink = `https://pronext.onrender.com/reset_password/${user._id}`
 
         // Make sure the resetFunc receives all necessary parameters correctly
-        const html = resetFunc(userName, verificationLink, otp, Email)
+        const html = resetFunc(name, verificationLink, otp, Email)
         await sendEmail({ email, subject, html })
 
         return res.redirect(`https://pronext.onrender.com/recover/code/${user._id}`)
@@ -429,11 +424,11 @@ exports.resendRecoveryCode = async (req, res) => {
         })
 
         // Send the OTP to the user's email
-        const userName = user.Username
+        const name = `${user.firstName.toUpperCase()}. ${user.lastName.slice(0,1).toUpperCase()}`
         const Email = user.email
         const subject =`${otp} is your account recovery code`
         const verificationLink = `https://pronext.onrender.com/reset_password/${user._id}`
-        const html = resetFunc(userName, verificationLink, otp, Email)
+        const html = resetFunc(name, verificationLink, otp, Email)
         await sendEmail({ email: user.email, subject, html })
 
         // return success response

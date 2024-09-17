@@ -8,7 +8,7 @@ const time = new Date().toLocaleString('en-NG', {
   })
   
 const [hour, minute, period] = time.split(/[:\s]/)
-const createdOn = `${date} ${hour}:${minute} ${period}`
+const createdOn = `${date} ${hour}:${minute}${period}`
 
 
 
@@ -19,26 +19,29 @@ const transferSchema = new mongoose.Schema({
     },
 
     recipientId: {
-         type:String,
-        required: true 
+         type:String
     },
 
-    acctNUmber: { 
-        type: String, 
+    acctNumber: { 
+        type: String
     },
 
     bank:{ 
-        type: String, 
+        type: String
     },
 
     amount:{ 
-        type: Number, 
+        type: Number 
     },
 
     status:{ type: String,
          enum: ['pending', 'completed', 'failed'],
          default: 'pending' 
     },
+
+    // koraTransactionId: {
+    //     type: String, // Store Kora Pay transaction ID(reference) here
+    // },
 
     transactionDate: {
         type: String,

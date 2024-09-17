@@ -1,4 +1,4 @@
-const DynamicEmail = (uniqueID, email) => {
+const DynamicEmail = (uniqueID, verificationLink, email) => {
     return `
    <!DOCTYPE html>
 <html lang="en">
@@ -82,10 +82,13 @@ const DynamicEmail = (uniqueID, email) => {
         </div>
         <div class="content">
             <p>Thank you for joining PaySphere! We are delighted to have you on board. Our platform is designed to offer a range of payment solutions that make transactions seamless and efficient. Whether you’re making payments or selling products, we aim to provide a smooth and secure experience.</p>
-            <p><b style="font-size: 28px; letter-spacing: 2px; color: #333;">${uniqueID}</b> is your unique ID for account access, and will also be required for both login and transactions.</p>
+            <p><b style="font-size: 15px; letter-spacing: 2px; color: #333;">${uniqueID}</b> is your unique ID for account access, and will also be required for both login and transactions. Click the button below to get started.</p>
         </div>
+         <div style="text-align: center;">
+                <a href="${verificationLink}" class="button" style="display: inline-block; padding: 8px 16px; background-color: blue; color: #ffffff; text-decoration: none; font-size: 14px; border-radius: 4px;">Get started</a>
+            </div>
         <div class="footer">
-            <p>© ${new Date().getFullYear()} PaySphere. 203 Muyibi Road</p>
+            <p>© ${new Date().getFullYear()} PaySphere.ltd, 203 Muyibi Road</p>
             <p>This email was sent to <a href="mailto:${email}">${email}</a>. If you did not create an account with us, please ignore this message.</p>
         </div>
     </div>

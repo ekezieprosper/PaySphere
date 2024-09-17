@@ -24,16 +24,16 @@ const depositSchema = new mongoose.Schema({
     },
 
     bankDetails: {
-        bankName: {type: String},
-        BankAcct: {type: String},
-        BVN: {type: String}
+        bankName: {type: String, trim: true},
+        BankAcctNumber: {type: String, trim: true, match: [/^\d{10}$/, 'Invalid account number']},
+        BVN: {type: String, trim: true, match: [/^\d{11}$/, 'Invalid BVN']}
     },
 
     cardDetails: {
-        cardNumber: {type: String},
-        expiryDate: {type: String},
-        cvv: {type: String},
-        pin: {type: String}
+        cardNumber: {type: String, trim: true, match: [/^\d{12,19}$/, 'Invalid card number']},
+        expiryDate: {type: String, trim: true, match: [/^(0[1-9]|1[0-2])\/?([0-9]{2})$/, 'Expiry date must be in MM/YY format']},
+        cvv: {type: String, trim: true, match: [/^\d{3,4}$/, 'CVV must be 3 or 4 digits']},
+        pin: {type: String, trim: true, match: [/^\d{4}$/, 'PIN must be 4 digits']}
     },
 
     status: { 
@@ -41,6 +41,10 @@ const depositSchema = new mongoose.Schema({
         enum: ['pending', 'completed', 'failed'], 
         default: 'pending'
     },
+
+    // koraTransactionId: {
+    //     type: String, // Store Kora Pay transaction ID(reference) here
+    // },
     
     transactionDate: { 
         type: String,

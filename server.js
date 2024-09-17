@@ -14,7 +14,13 @@ const port = process.env.port
 const app = express()
 
 app.use(express.json())
-app.use(cors())
+app.use(cors({
+  origin: '*',
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  allowedHeaders: 'Content-Type, Authorization',
+}))
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extended: true }))
 
 // Routers
 app.use(userRouter)

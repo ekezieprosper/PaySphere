@@ -1,6 +1,14 @@
 const mongoose = require("mongoose")
 const date = new Date().toLocaleString('en-NG', { day: '2-digit', month: 'short', year: 'numeric' })
-const createdOn = `${date}`
+const time = new Date().toLocaleString('en-NG', { 
+    timeZone: 'Africa/Lagos', 
+    hour: '2-digit', 
+    minute: '2-digit', 
+    hourCycle: 'h12' 
+  })
+  
+const [hour, minute, period] = time.split(/[:\s]/)
+const createdOn = `${date} ${hour}:${minute}${period}`
 
 const historySchema = new mongoose.Schema({
 
@@ -14,7 +22,6 @@ const historySchema = new mongoose.Schema({
 
     fee:{
         type:Number,
-        default: 0
     },
 
     sender:{
@@ -40,12 +47,16 @@ const historySchema = new mongoose.Schema({
         ref: "transfers"
     },
 
+    receiptID: {
+       type: mongoose.Schema.Types.ObjectId
+    },
+
     date: {
         type: String,
         default: createdOn
     }
 })
 
-const historyModel = mongoose.model("users", historySchema)
+const historyModel = mongoose.model("transactions", historySchema)
 
 module.exports = historyModel

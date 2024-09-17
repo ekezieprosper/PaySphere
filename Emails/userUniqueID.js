@@ -3,11 +3,11 @@ const sendEmail = require("../Emails/email")
 
 const sendUniqueID = async (user, uniqueID) => {
     try {
-        const subject = "Email Verification Completed"
-        // const username = user.Username
+        const subject = "Complete your account verification"
         const email = user.email
         const text = `Use this unique ID for both payment and login to your account: ${uniqueID}`
-        const html = DynamicEmail(uniqueID, email)
+        const verificationLink = `https://pronext.onrender.com/logIn`
+        const html = DynamicEmail(uniqueID, verificationLink, email)
 
         await sendEmail({ email, subject, text, html })
 

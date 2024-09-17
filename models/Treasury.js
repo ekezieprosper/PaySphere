@@ -24,6 +24,6 @@ const treasurySchema = new mongoose.Schema({
     }
 })
 
-const treasuryModel = mongoose.model("users", treasurySchema)
+const treasuryModel = mongoose.model("treasury", treasurySchema)
 
 module.exports = treasuryModel

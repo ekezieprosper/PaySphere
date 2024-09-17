@@ -1,11 +1,13 @@
 const router = require("express").Router()
 
-const { user2userTransfer, app2BankTransfer, makePaymentWithUSSD } = require("../controllers/transferController")
+const { peer2PeerPaymentTransaction, createApp2BankTransaction, makePaymentWithUSSD, proccessPeer2PeerPaymentTransaction, processBankTransaction } = require("../controllers/transferController")
 
 const authenticate = require("../auth/userAuth")
 
-router.post("/transfer/app", authenticate, user2userTransfer)
-router.post("/transfer/bank", authenticate, app2BankTransfer)
-router.post("/USSDpayment/transfer", authenticate, makePaymentWithUSSD)
+router.post("/initialize_transaction/app", authenticate, peer2PeerPaymentTransaction)
+router.post("/process_app_transaction", authenticate, proccessPeer2PeerPaymentTransaction)
+router.post("/initialize_transaction/bank", authenticate, createApp2BankTransaction)
+router.post("/process_bank_transaction", authenticate, processBankTransaction)
+router.post("/USSDpayment/transfer", makePaymentWithUSSD)
 
 module.exports = router

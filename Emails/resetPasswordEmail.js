@@ -1,4 +1,4 @@
-const resetFunc = (userName, verificationLink, otp, Email) => {
+const resetFunc = (name, verificationLink, otp, Email) => {
     return `
    <!DOCTYPE html>
 <html lang="en">
@@ -81,8 +81,8 @@ const resetFunc = (userName, verificationLink, otp, Email) => {
                 <div style="text-align: center; margin-bottom: 15px;">
             </div>
             <div style="text-align: left;">
-            <p>We received a request to reset the password for your account <b>${userName}.</b></p>
-            <p>Enter this opt code, do not share.</p>
+            <p>We received a request to reset the password for your account <b>${name}.</b></p>
+            <p>Use the opt code below to reset your password. Expires in <b>10 minutes</b>.</p>
              </div>
              <h2 style="text-align: left; font-size: 28px; letter-spacing: 5px; color: #333;">${otp}</h2>
              <p style="text-align: left; margin-top: 15px;">Alternatively, you can directly reset your password</p>
@@ -91,7 +91,7 @@ const resetFunc = (userName, verificationLink, otp, Email) => {
             </div>
             <hr style="margin: 15px 0;">
             <footer style="text-align: center; color: #999; font-size: 10px;">
-                <p>© ${new Date().getFullYear()} Pronext. 203 Muyibi Road</p>
+                <p>© ${new Date().getFullYear()} PaySphere.ltd, 203 Muyibi Road</p>
                 <p>This message was sent to <a href="mailto:${Email}" style="color: #999;">${Email}</a>.</p>
             </footer>
         </div>

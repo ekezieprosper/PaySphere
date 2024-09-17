@@ -4,10 +4,14 @@ const date = new Date().toLocaleString('en-NG', { day: '2-digit', month: 'short'
 const createdOn = `${date}`
 
 const userSchema = new mongoose.Schema({
-    Username: { 
+    firstName: { 
         type: String, 
         required: true,
-        unique: true 
+    },
+
+    lastName: { 
+        type: String, 
+        required: true,
     },
     
     email: { 
@@ -29,7 +33,7 @@ const userSchema = new mongoose.Schema({
     phoneNumber: { 
         type: String,
         required: true,
-        unique: true ,
+        unique: true,
         trim: true
     },
 
@@ -65,9 +69,9 @@ const userSchema = new mongoose.Schema({
         ref: 'notification'
     }],
 
-    histories: [{
+    transactions: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'historyModel'
+        ref: 'transactions'
     }],
 
     createdOn: {

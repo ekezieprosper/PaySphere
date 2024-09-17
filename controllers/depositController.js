@@ -1,5 +1,7 @@
 const depositModel = require('../models/depositModel')
 const userModel = require('../models/userModel')
+const transactionHistories = require('../models/transactionHistories')
+
 
 
 exports.bankDeposit = async (req, res) => {
@@ -12,7 +14,7 @@ exports.bankDeposit = async (req, res) => {
       return res.status(404).json({ 
         message: 'User not found' 
     })
-}
+   }
 
     if(!amount){
         return res.status(404).json({ 
@@ -20,9 +22,15 @@ exports.bankDeposit = async (req, res) => {
         })
     }
 
-    if (!bankDetails || !bankDetails.bankName || !bankDetails.BankAcct || !bankDetails.BVN) {
+    if (amount < 100) {
       return res.status(400).json({
-        message: '(bankName, BankAcct, BVN) are all required'
+           error: "Amount must be between ₦100 and above." 
+          })
+  }
+
+    if (!bankDetails || !bankDetails.bankName || !bankDetails.BankAcctNumber || !bankDetails.BVN) {
+      return res.status(400).json({
+        message: '(bankName, BankAcctNumber, BVN) are all required'
       });
     }
 
@@ -35,17 +43,28 @@ exports.bankDeposit = async (req, res) => {
 
     if (deposit) {
       user.acctBalance += amount 
+      deposit.status = 'completed'   
+      
+      const Teller = new transactionHistories({
+      message: `Money in from ${bankDetails.bankName}`, 
+      amountPaid: amount,
+      recipient:`${user.uniqueID}`,
+      receiptID: deposit._id
+      })
+
+      await Teller.save() 
+      user.transactions.push(Teller._id)
       await user.save()
-        deposit.status = 'completed'
+      
     } else {
       deposit.status = 'failed'
     }
-
+    
     await deposit.save()
-
+    
     return res.status(201).json({ 
-        message: 'successfull',
-        deposit 
+      message: 'successfull',
+      deposit 
     })
   } catch (error) {
     res.status(500).json({
@@ -53,6 +72,7 @@ exports.bankDeposit = async (req, res) => {
      })
   }
 }
+
 
 exports.cardDeposit = async (req, res) => {
     try {
@@ -88,8 +108,18 @@ exports.cardDeposit = async (req, res) => {
   
       if (deposit) {
         user.acctBalance += amount 
-        await user.save()
         deposit.status = 'completed'
+        
+        const Teller = new transactionHistories({
+          message: `Money in from ${cardDetails.cardNumber}`, 
+          amountPaid: amount,
+          recipient:`${user.uniqueID}`,
+          receiptID: deposit._id
+        })
+        
+        await Teller.save() 
+        user.transactions.push(Teller._id)
+        await user.save()
 
       } else {
         deposit.status = 'failed'

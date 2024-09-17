@@ -1,4 +1,4 @@
-const resendOtpEmail = (userName, otp, verificationLink, email) => {
+const requestEmail = (name, amount, paymentLink, denyLink, Email) => {
     return `
    <!DOCTYPE html>
 <html lang="en">
@@ -73,28 +73,49 @@ const resendOtpEmail = (userName, otp, verificationLink, email) => {
             color: #888888;
             text-decoration: none;
         }
+        .button-container {
+            display: flex;
+            justify-content: flex-start; /* Align buttons horizontally */
+            gap: 5%; /* Spacing between buttons */
+            margin-top: 15px;
+        }
+        .button {
+            padding: 8px 16px; /* Reduced button padding */
+            width: 100px; /* Reduced width */
+            text-align: center;
+            font-size: 14px; /* Reduced font size */
+            border-radius: 4px;
+        }
+        .pay-button {
+            background-color: blue;
+            color: white;
+            text-decoration: none;
+        }
+        .reject-button {
+            background-color: red;
+            color: white;
+            text-decoration: none;
+        }
     </style>
 </head>
  <body>
-       <div style="font-family: Arial, sans-serif; max-width: 480px; margin: auto; padding: 10px;">
-                <img src="https://res.cloudinary.com/da9fesl0x/image/upload/v1724452088/pj2mmfdp9conop8774ct.jpg" alt="Pronext Logo" width="156" height="100">
-                <div style="text-align: center; margin-bottom: 15px;">
-                <h2 style="font-size: 20px; color: #000; font-family: 'Helvetica Neue', sans-serif;">Account verification.</h2>
-            </div>
-            <p>Hi ${userName},</p>
             <div style="text-align: left;">
-            <p> We're excited to have you join us, click the button below to verify your account and stay connected:</p>
+            <p>You've received a payment request from <b>${name}.</b></p>
+            <p>Details of the Payment Request:</p>
+            <p>Amount: ₦${amount}</p>
+            <p>Sender: ${name}</p>
              </div>
-            <div style="text-align: center;">
-                <a href="${verificationLink}" class="button" style="display: inline-block; padding: 8px 16px; background-color: green; color: #ffffff; text-decoration: none; font-size: 14px; border-radius: 4px;">Verify Account</a>
+             <p style="text-align: left; margin-top: 15px;">Click the link below to complete payment or deny</p>
+            <div class="button-container">
+                <a href="${paymentLink}" class="button pay-button">Pay Now</a>
+                <a href="${denyLink}" class="button reject-button">Reject</a>
             </div>
-
-            <p style="text-align: center; margin-top: 15px;">Or enter this verification code:</p>
-            <h2 style="text-align: center; font-size: 28px; letter-spacing: 5px; color: #333;">${otp}</h2>
+             <p style="text-align: left; margin-top: 15px;">By clicking the link, the requested amount will automatically be deducted from your account and transferred</p>
+            <p>to <b>${name}'s</b> account if you have sufficient funds.</p>
             <hr style="margin: 15px 0;">
             <footer style="text-align: center; color: #999; font-size: 10px;">
-                <p>© ${new Date().getFullYear()} Pronext. 203 Muyibi Road</p>
-                <p>This message was sent to <a href="mailto:${email}" style="color: #999;">${email}</a>.</p>
+                <p>© ${new Date().getFullYear()} PaySphere.ltd, 203 Muyibi Road</p>
+                <p>This message was sent to <a href="mailto:${Email}" style="color: #999;">${Email}</a>.</p>
             </footer>
         </div>
     </body>
@@ -102,4 +123,4 @@ const resendOtpEmail = (userName, otp, verificationLink, email) => {
     `;
 }
 
-module.exports = resendOtpEmail;
+module.exports = { requestEmail };

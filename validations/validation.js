@@ -2,17 +2,17 @@ const Joi = require("@hapi/joi")
 
 const signUp = (req, res, next) => {
   const validateSignup = Joi.object({
-    Username: Joi.string()
-      .required().min(8)
-       // Regex pattern allowing lowercase letters, numbers, underscore, and hyphen
-      .pattern(new RegExp('^[a-z0-9_.-]+$'))
-      .messages({
-        'string.base': 'Username must be a string',
-        'string.empty': 'Username cannot be empty',
-        'string.min': 'userName is weak',
-        'string.pattern.base': 'Only numbers, hyphens, and underscores can be added if needed in the userName',
-        'any.required': 'Username is required'
-      }),
+    firstName: Joi.string().min(3).max(40).trim().pattern(/^[a-zA-Z]+$/).required().messages({
+      'string.empty': 'firstName cannot be empty',
+      'string.min': 'Min 3 characters',
+      'string.pattern.base': 'Numbers and space not accepted',
+    }),
+
+    lastName: Joi.string().min(3).max(40).trim().pattern(/^[a-zA-Z]+$/).required().messages({
+      'string.empty': 'lastName cannot be empty',
+      'string.min': 'Min 3 characters',
+      'string.pattern.base': 'Numbers and space not accepted',
+    }),
 
     email: Joi.string().email().required().messages({
       'string.base': 'Email must be a string',
@@ -37,9 +37,9 @@ const signUp = (req, res, next) => {
     })
 })
 
-  const {Username, email, password,phoneNumber } = req.body
+  const {firstName, lastName, email, password,phoneNumber } = req.body
 
-  const { error } = validateSignup.validate({Username,email,password, phoneNumber}, { abortEarly: false })
+  const { error } = validateSignup.validate({firstName,lastName,email,password,phoneNumber}, { abortEarly: false })
   if (error) {
     const errors = error.details.map(detail => detail.message)
     

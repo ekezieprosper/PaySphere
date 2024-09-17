@@ -1,4 +1,4 @@
-const deleteMail = (Username, supportTeam, email) => {
+const deleteMail = (name, supportTeam, email) => {
     return `
    <!DOCTYPE html>
 <html lang="en">
@@ -82,12 +82,12 @@ const deleteMail = (Username, supportTeam, email) => {
                 <h2 style="font-size: 18px; color: #000; font-family: 'Helvetica Neue', sans-serif;">Your account has been suspended for 365 days.</h2>
             </div>
             <div style="text-align: left;">
-             <p><b>${Username}</b>, We regret to inform you that your account has been suspended due to violations of our terms and service. This action was taken after careful review and in accordance with our policies to ensure the security and integrity of our platform.</p>
+             <p><b>${name}</b>, We regret to inform you that your account has been suspended due to violations of our terms and service. This action was taken after careful review and in accordance with our policies to ensure the security and integrity of our platform.</p>
                     <p>If you believe this is a mistake or have any questions regarding the suspension, please contact our support team for further assistance at <a href="mailto:${supportTeam}" style="color: #007bff; text-decoration: underline;">support team</a>. We are here to help you resolve this matter as quickly as possible.</p>
              </div>
             <hr style="margin: 15px 0;">
             <footer style="text-align: center; color: #999; font-size: 8px;">
-                <p>© ${new Date().getFullYear()} PaySphere. 203 Muyibi Road</p>
+                <p>© ${new Date().getFullYear()} PaySphere.ltd, 203 Muyibi Road</p>
                 <p>This message was sent to <a href="mailto:${email}" style="color: #999;">${email}</a>.</p>
             </footer>
         </div>
