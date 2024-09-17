@@ -454,8 +454,8 @@ exports.makePaymentWithUSSD = async (req, res) => {
                 recipient:`${receiverName} | ${receiver.uniqueID}`,
             })
             await senderHistory.save() 
-            sender.histories.push(senderHistory._id)
-           await sender.save()  
+            user.histories.push(senderHistory._id)
+           await user.save()  
             
            const notifyReceiver = new notificationModel({
                message: `Money in from ${senderName}`, 
@@ -463,8 +463,8 @@ exports.makePaymentWithUSSD = async (req, res) => {
                sender:`${senderName} | ${sender.uniqueID}`,
             })
           await notifyReceiver.save() 
-          receiver.notifications.push(notifyReceiver._id)
-          await receiver.save()
+          recipient.notifications.push(notifyReceiver._id)
+          await recipient.save()
          }
      }
         } else {
