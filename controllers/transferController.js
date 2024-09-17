@@ -240,78 +240,6 @@ exports.processBankTransaction = async (req, res) => {
 }
 
 
-
-exports.makePaymentWithUSSD  =async(req, res)=>{
-    try {
-    const { sessionId, serviceCode, phoneNumber, text } = req.body
-    
-    let response = ''
-    const input = text.split('*')
-
-    // Find the user by phone number
-    const user = await userModel.findOne({ phoneNumber })
-    if (!user) {
-        response = `END User not found. Please register first.`
-        return res.send(response)
-    }
-
-    if (text === '') {
-        // Initial menu
-        response = `CON Welcome to the USSD service.
-        1. Check balance
-        2. Transfer money`
-    } else if (input[0] === '1') {
-        // Option 1: Check balance
-        response = `END Your account balance is ₦${user.acctBalance}`
-    } else if (input[0] === '2' && input.length === 1) {
-        // Option 2: Transfer - Ask for recipient's unique ID
-        response = `CON Enter recipient's uniqueID:`
-    } else if (input[0] === '2' && input.length === 2) {
-        // Ask for amount to transfer
-        response = `CON Enter amount to transfer:`
-    } else if (input[0] === '2' && input.length === 3) {
-        // Ask for the user's transfer PIN
-        response = `CON Enter your 4-digit transfer PIN:`
-    } else if (input[0] === '2' && input.length === 4) {
-        // Validate the transaction
-        const recipientID = input[1]
-        const amount = parseFloat(input[2])
-        const pin = input[3]
-
-        // Validate recipient and perform the transfer
-        const recipient = await userModel.findOne({ uniqueID: recipientID })
-        if (!recipient) {
-            response = `END Recipient not found.`
-        } else if (user.acctBalance < amount) {
-            response = `END Insufficient funds.`
-        } else if (!(await user.comparePin(pin))) {
-            response = `END Invalid PIN.`
-        } else {
-            // Perform transfer
-            user.acctBalance -= amount
-            recipient.acctBalance += amount
-            await user.save()
-            await recipient.save()
-            response = `END Your transaction of ₦${amount} to ${recipient.uniqueID} was successful.`
-        }
-    } else {
-        // Invalid option
-        response = `END Invalid option.`
-    }
-
-    res.set('Content-type: text/plain')
-
-    // Send response to Africa's Talking
-    res.send(response)
-        
-    } catch (error) {
-        res.status(500).json({
-            error: error.message 
-       })
-   }
-}
-
-
 exports.makePaymentWithUSSD = async (req, res) => {
     try {
         const { sessionId, serviceCode, phoneNumber, text } = req.body
@@ -322,7 +250,7 @@ exports.makePaymentWithUSSD = async (req, res) => {
         // Find the user by phone number
         const user = await userModel.findOne({ phoneNumber })
         if (!user) {
-            response = `END This phone number "${phoneNumber}" wasn't to while regristering with us.`
+            response = `END This phone number "${phoneNumber}" wasn't used while regristering with us.`
             return res.send(response)
         }
 
@@ -362,18 +290,20 @@ exports.makePaymentWithUSSD = async (req, res) => {
 
             } else if (user.acctBalance < amount) {
             response = `END Insufficient funds.`
-
-            } else if (!(await user.comparePin(pin))) {
-            response = `END Invalid PIN.`
-
             } else {
-                // Perform transfer
-                user.acctBalance -= amount
-                recipient.acctBalance += amount
-                await user.save()
-                await recipient.save()
-                response = `END Your transaction of ₦${amount} to ${recipient.uniqueID} was successful.`
-            }
+            // Verify the PIN
+            const isPinValid = await bcrypt.compare(pin, user.pin) 
+            if (!isPinValid) {
+                response = `END Invalid PIN.`
+           } else {
+            // Perform transfer
+            user.acctBalance -= amount
+            recipient.acctBalance += amount
+            await user.save()
+            await recipient.save()
+            response = `END Your transaction of ₦${amount} to ${recipient.uniqueID} was successful.`
+         }
+     }
         } else {
             // Invalid option
             response = `END Invalid option.`
@@ -385,7 +315,89 @@ exports.makePaymentWithUSSD = async (req, res) => {
         // Send response to Africa's Talking
         res.send(response)
     } catch (error) {
-        console.error('USSD Error:', error)
+        console.error('USSD Error:', error.stack || error)
         res.status(500).send('END An error occurred. Please try again later.')
     }
 }
+
+// exports.makePaymentWithUSSD = async (req, res) => {
+//     try {
+//         const { sessionId, serviceCode, phoneNumber, text } = req.body;
+//         console.log(`Received request with text: ${text}`); // Debugging line
+
+//         let response = '';
+
+//         // Find the user by phone number
+//         const user = await userModel.findOne({ phoneNumber });
+//         if (!user) {
+//             response = `END This phone number "${phoneNumber}" wasn't registered with us.`;
+//             return res.send(response);
+//         }
+
+//         // If no input, present main menu
+//         if (text === '') {
+//             response = `CON Welcome to our USSD service.\n1. Check balance\n2. Transfer money`;
+//         } 
+//         // Step 1: If input is "1", check balance
+//         else if (text === '1') {
+//             response = `END Your account balance is ₦${user.acctBalance}`;
+//         } 
+//         // Step 2: If input is "2", ask for recipient's unique ID
+//         else if (text === '2') {
+//             response = `CON Enter recipient's unique ID:`;
+//         } 
+//         // Step 3: If input is a valid unique ID, ask for the transfer amount
+//         else if (text.startsWith('2*')) {
+//             // Split by "*" but only after validating the sequence
+//             const inputText = text.slice(2);  // Removes "2*"
+            
+//             // Check if unique ID has been provided and the amount has not yet been provided
+//             if (!inputText.includes('*')) {
+//                 response = `CON Enter amount to transfer:`;
+//             } 
+//             // Step 4: If unique ID and amount are present, ask for the transfer PIN
+//             else if (inputText.split('*').length === 2) {
+//                 response = `CON Enter your 4-digit transfer PIN:`;
+//             }
+//             // Step 5: Validate transaction after receiving all required inputs
+//             else if (inputText.split('*').length === 3) {
+//                 const [recipientID, amount, pin] = inputText.split('*');
+
+//                 // Validate recipient and perform the transfer
+//                 const recipient = await userModel.findOne({ uniqueID: recipientID });
+//                 if (!recipient) {
+//                     response = `END Recipient not found.`;
+//                 } else if (user.acctBalance < parseFloat(amount)) {
+//                     response = `END Insufficient funds.`;
+//                 } else {
+//                     // Verify the PIN
+//                     const isPinValid = await bcrypt.compare(pin, user.pin); // Ensure user.pin is the hashed PIN
+//                     if (!isPinValid) {
+//                         response = `END Invalid PIN.`;
+//                     } else {
+//                         // Perform transfer
+//                         user.acctBalance -= parseFloat(amount);
+//                         recipient.acctBalance += parseFloat(amount);
+//                         await user.save();
+//                         await recipient.save();
+//                         response = `END Your transaction of ₦${amount} to ${recipient.uniqueID} was successful.`;
+//                     }
+//                 }
+//             } else {
+//                 response = `END Invalid option.`;
+//             }
+//         } else {
+//             // Invalid option
+//             response = `END Invalid option.`;
+//         }
+
+//         // Set Content-Type to text/plain
+//         res.set('Content-Type', 'text/plain');
+        
+//         // Send response to Africa's Talking
+//         res.send(response);
+//     } catch (error) {
+//         console.error('USSD Error:', error.stack || error);
+//         res.status(500).send('END An error occurred. Please try again later.');
+//     }
+// };
