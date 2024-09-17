@@ -391,7 +391,7 @@ exports.makePaymentWithUSSD = async (req, res) => {
         // Find the user by phone number
         const user = await userModel.findOne({ phoneNumber })
         if (!user) {
-            response = `END This phone number "${phoneNumber}" wasn't used while regristering with us.`
+            response = `END This phone number "${phoneNumber}" wasn't used while registering with us.`
             return res.send(response)
         }
 
@@ -419,54 +419,56 @@ exports.makePaymentWithUSSD = async (req, res) => {
         response = `CON Enter your 4-digit transfer PIN:`
 
         } else if (input[0] === '2' && input.length === 4) {
-            // Validate the transaction
-            const recipientID = input[1]
-            const amount = parseFloat(input[2])
-            const pin = input[3]
+        // Validate the transaction
+        const recipientID = input[1]
+        const amount = parseFloat(input[2])
+        const pin = input[3]
 
-            // Validate recipient and perform the transfer
-            const recipient = await userModel.findOne({ uniqueID: recipientID })
-            if (!recipient) {
-            response = `END Recipient not found.`
+        // Validate recipient and perform the transfer
+        const recipient = await userModel.findOne({ uniqueID: recipientID })
+        if (!recipient) {
+        response = `END Recipient not found.`
 
-            } else if (user.acctBalance < amount) {
-            response = `END Insufficient funds.`
-            } else {
-            // Verify the PIN
-            const isPinValid = await bcrypt.compare(pin, user.pin) 
-            if (!isPinValid) {
-                response = `END Invalid PIN.`
-           } else {
-            // Perform transfer
-            user.acctBalance -= amount
-            recipient.acctBalance += amount
-            await user.save()
-            await recipient.save()
-            response = `END Your transaction of ₦${amount} to ${recipient.uniqueID} was successful.`
+        } else if (user.acctBalance < amount) {
+        response = `END Insufficient funds.`
 
-            const receiverName = `${recipient.firstName.toUpperCase()} ${recipient.lastName.slice(0,2).toUpperCase()}****`
-            const senderName = `${user.firstName.toUpperCase()} ${user.lastName.toUpperCase()}`
+        } else {
+        // Verify the PIN
+        const isPinValid = await bcrypt.compare(pin, user.pin) 
+        if (!isPinValid) {
+        response = `END Invalid PIN.`
+        } else {
+        // Perform transfer
+        user.acctBalance -= amount
+        recipient.acctBalance += amount
+        // await user.save()
+        // await recipient.save()
+        response = `END Your transaction of ₦${amount} to ${recipient.uniqueID} was successful.`
 
-            // create transaction history for the sender
-            const senderHistory = new transactionHistories({
-                message: `Transfer to ${receiverName} was successfull`, 
-                amountPaid: amount,
-                recipient:`${receiverName} | ${receiver.uniqueID}`,
-            })
-            await senderHistory.save() 
-            user.histories.push(senderHistory._id)
-           await user.save()  
-            
-           const notifyReceiver = new notificationModel({
-               message: `Money in from ${senderName}`, 
-               amountPaid: amount,
-               sender:`${senderName} | ${sender.uniqueID}`,
-            })
-          await notifyReceiver.save() 
-          recipient.notifications.push(notifyReceiver._id)
-          await recipient.save()
-         }
-     }
+        const receiverName = `${recipient.firstName.toUpperCase()} ${recipient.lastName.slice(0,2).toUpperCase()}****`
+        const senderName = `${user.firstName.toUpperCase()} ${user.lastName.toUpperCase()}`
+
+        // Create transaction history for the sender
+        const senderHistory = new transactionHistories({
+         message: `Transfer to ${receiverName} was successful`, 
+        amountPaid: amount,
+        recipient: `${receiverName} | ${recipient.uniqueID}`,
+        })
+        await senderHistory.save()
+        user.histories.push(senderHistory._id)
+        await user.save()
+
+        // Create notification for the receiver
+        const notifyReceiver = new notificationModel({
+        message: `Money in from ${senderName}`, 
+        amountPaid: amount,
+        sender: `${senderName} | ${user.uniqueID}`,
+        })
+        await notifyReceiver.save()
+        recipient.notifications.push(notifyReceiver._id)
+        await recipient.save()
+        }
+        }
         } else {
             response = `END Invalid option.`
         }
