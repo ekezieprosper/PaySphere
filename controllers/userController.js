@@ -90,12 +90,12 @@ exports.signUp_user = async (req, res) => {
 
 exports.logIn = async (req, res) => {
     try {
-      const { walletID, password } = req.body
+      const { uniqueID, password } = req.body
   
-      const user = await userModel.findOne({ walletID })
+      const user = await userModel.findOne({walletID : uniqueID})
       if (!user) {
         return res.status(404).json({
-          error: `User with wallet ID "${walletID}" was not found.`
+          error: `User with wallet ID "${uniqueID}" was not found.`
         })
       }
   

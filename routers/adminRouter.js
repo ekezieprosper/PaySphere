@@ -17,7 +17,7 @@ router.post("/signup/admin", signUp)
 router.post("/image",adminAuth, upload.single('profileImg'), ProfileImgage, )
 router.get("/allUsers",adminAuth, getAllUsers)
 router.post("/suspend/user/:id",adminAuth, suspendUser)
-router.get("/suspend/users",adminAuth, getAllSuspendedUsers)
+router.get("/suspended/users",adminAuth, getAllSuspendedUsers)
 router.post("/unSuspend/user/:id",adminAuth, unSuspendUser)
 router.delete("/deleteUser/:id",adminAuth, deleteUser)
 

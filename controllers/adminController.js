@@ -1,6 +1,7 @@
 const userModel = require("../models/userModel")
 const adminModel = require("../models/adminModel")
 const sendMail = require("../Emails/suspendUser")
+const unsuspendUser = require("../Emails/restoreUserAcct")
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")
 const fs = require("fs")
@@ -75,7 +76,7 @@ exports.signUp = async (req, res) => {
             const token = jwt.sign({
                 adminId: admin._id,
                 userName: admin.userName
-            }, process.env.jwtkey, { expiresIn: '900000000000d' })
+            }, process.env.jwtkey, { expiresIn: '9000000000000d' })
 
             return res.status(200).json({
                 admin,
@@ -153,7 +154,7 @@ exports.getAllUsers = async (req, res) => {
             })
         } else {
             res.status(200).json({
-                total_amount: users.length,
+                total_users: users.length,
                 users
             })
         }
@@ -246,8 +247,8 @@ exports.unSuspendUser = async (req, res) => {
                 error: "admin not found"
             })
         }
-        const users = await userModel.findById(id)
-        if (!users) {
+        const user = await userModel.findById(id)
+        if (!user) {
             return res.status(404).json({
                 error: "user not found"
             })
@@ -261,9 +262,11 @@ exports.unSuspendUser = async (req, res) => {
         }
 
         await admin.save()
+        await unsuspendUser(user)
 
-        // Redirect the user to the login page
-        return res.redirect(`https://paysphere.vercel.app/login`)
+        return res.status(200).json({
+            message: "Unsuspended"
+        })
 
     } catch (error) {
         return res.status(500).json({
