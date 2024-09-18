@@ -1,13 +1,13 @@
 const DynamicEmail = require("../Emails/emailIndex")
 const sendEmail = require("../Emails/email")
 
-const sendUniqueID = async (user, uniqueID) => {
+const sendUniqueID = async (user, walletID) => {
     try {
         const subject = "Complete your account verification"
         const email = user.email
-        const text = `Use this unique ID for both payment and login to your account: ${uniqueID}`
-        const verificationLink = `https://pronext.onrender.com/logIn`
-        const html = DynamicEmail(uniqueID, verificationLink, email)
+        const text = `Verify your account`
+        const verificationLink = `https://paysphere.vercel.app/login`
+        const html = DynamicEmail(walletID, verificationLink, email)
 
         await sendEmail({ email, subject, text, html })
 

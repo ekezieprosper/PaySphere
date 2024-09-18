@@ -28,17 +28,24 @@ const adminSchema = new mongoose.Schema({
         default: true
     },
 
+    treasury: { 
+        type: mongoose.Schema.Types.ObjectId, 
+      ref: 'treasury'
+  },
+
+    suspended: [{
+        type: mongoose.Schema.Types.ObjectId,
+         ref: 'users'
+    }],
+
+    
     createdAt: {
         type: String, 
         default: createdOn
     },
 
-    suspended: [{
-        type: mongoose.Schema.Types.ObjectId
-    }]
-
 })
 
-const adminModel = mongoose.model("admin", adminSchema)
+const adminModel = mongoose.model("admins", adminSchema)
 
 module.exports = adminModel

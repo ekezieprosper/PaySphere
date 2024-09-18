@@ -55,9 +55,9 @@ exports.signUp_user = async (req, res) => {
       const salt = bcrypt.genSaltSync(10)
       const hashPassword = bcrypt.hashSync(password, salt)
   
-      // Generate a unique ID for the user
+      // Generate a walletID for the user
       const trimmedUserName = firstName.slice(0, 4)
-      const uniqueID = `${trimmedUserName.toLowerCase()}${Math.floor(Math.random() * 1000000)}`.padStart(6, '0')
+      const walletID = `${trimmedUserName.toLowerCase()}${Math.floor(Math.random() * 1000000)}`.padStart(10, '0')
   
       // Create the user in the database
       const user = await userModel.create({
@@ -65,7 +65,7 @@ exports.signUp_user = async (req, res) => {
         lastName:lastName.toLowerCase().charAt(0).toUpperCase() + lastName.slice(1),
         phoneNumber: PhoneNumber,
         password: hashPassword,
-        uniqueID,
+        walletID,
         email: email.toLowerCase(),
         emailCount: 1
       })
@@ -76,7 +76,7 @@ exports.signUp_user = async (req, res) => {
         })
       }
   
-      await sendUniqueID(user, uniqueID)
+      await sendUniqueID(user, walletID)
   
       return res.status(201).json(user)
   
@@ -90,12 +90,12 @@ exports.signUp_user = async (req, res) => {
 
 exports.logIn = async (req, res) => {
     try {
-      const { uniqueID, password } = req.body
+      const { walletID, password } = req.body
   
-      const user = await userModel.findOne({ uniqueID })
+      const user = await userModel.findOne({ walletID })
       if (!user) {
         return res.status(404).json({
-          error: `User with ID "${uniqueID}" not found.`
+          error: `User with wallet ID "${walletID}" was not found.`
         })
       }
   
@@ -124,7 +124,7 @@ exports.logIn = async (req, res) => {
       // Generate a token for the user
       const token = jwt.sign({
         userId: user._id,
-        firstName: user.firstName, 
+        walletID: user.walletID, 
         lastName: user.lastName
     }, process.env.jwtkey, { expiresIn: '2d' })
 
@@ -142,7 +142,7 @@ exports.logIn = async (req, res) => {
   }
 
 
-  exports.createTransferPin = async(req, res)=>{
+  exports.createTransactionPin = async(req, res)=>{
     try {
         const id = req.user.userId
         const {pin} = req.body
@@ -199,7 +199,7 @@ exports.logOut = async (req, res) => {
 
         const expiredToken = jwt.sign({
             userId: user._id,
-            firstName: user.firstName, 
+            walletID: user.walletID, 
             lastName: user.lastName
         }, process.env.jwtkey, { expiresIn: '1sec' })
 
@@ -287,7 +287,7 @@ exports.deleteProfileImg = async (req, res) => {
     try {
         const id = req.user.userId
 
-        const user = await userModel.findById(id) || await playerModel.findById(id)
+        const user = await userModel.findById(id)
         if (user.profileImg) {
             const oldImage = user.profileImg.split("/").pop().split(".")[0]
             await cloudinary.uploader.destroy(oldImage)
@@ -443,7 +443,7 @@ exports.resendRecoveryCode = async (req, res) => {
 }
 
 
-exports.resetCode = async (req, res) => {
+exports.inpute_reset_code = async (req, res) => {
     try {
         const id = req.params.id
         const { otp } = req.body

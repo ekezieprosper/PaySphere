@@ -11,23 +11,15 @@ const [hour, minute, period] = time.split(/[:\s]/)
 const createdOn = `${date} ${hour}:${minute}${period}`
 
 
-
 const transferSchema = new mongoose.Schema({
-    sender:{ 
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: 'users'
-    },
 
-    recipientId: {
+    senderId: {
+          type: mongoose.Schema.Types.ObjectId,
+        ref: "users"
+   },
+   
+   recipientId: {
          type:String
-    },
-
-    acctNumber: { 
-        type: String
-    },
-
-    bank:{ 
-        type: String
     },
 
     amount:{ 
@@ -39,15 +31,12 @@ const transferSchema = new mongoose.Schema({
          default: 'pending' 
     },
 
-    // koraTransactionId: {
-    //     type: String, // Store Kora Pay transaction ID(reference) here
-    // },
-
     transactionDate: {
         type: String,
         default: createdOn
     }
 })
 
-const transferModel = mongoose.model('transfers', transferSchema)
+
+const transferModel = mongoose.model('transactions', transferSchema)
 module.exports = transferModel

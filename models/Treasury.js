@@ -7,12 +7,7 @@ const treasurySchema = new mongoose.Schema({
           type: mongoose.Schema.Types.ObjectId, 
         ref: 'users'
     },
-
-    admins: { 
-        type: mongoose.Schema.Types.ObjectId, 
-      ref: 'admin'
-  },
-
+    
     totalBalance: {
         type: Number,
         default: 0

@@ -1,12 +1,9 @@
 const express = require("express")
 const cors = require("cors")
-const bodyParser = require("body-parser")
 
 const userRouter = require("./routers/userRouter")
-// const adminRouter = require("./routers/adminRouter")
-const depositRouter = require("./routers/depositRouter")
-const transferRouter = require("./routers/transferRouter")
-const requestPaymentRouter = require("./routers/requestPaymentRouter")
+const adminRouter = require("./routers/adminRouter")
+const paymentRouter = require("./routers/paymentRouter")
 
 require("./config/config")
 require("dotenv").config()
@@ -25,10 +22,8 @@ app.use(express.urlencoded({ extended: true }))
 
 // Routers
 app.use(userRouter)
-// app.use(adminRouter)
-app.use(depositRouter)
-app.use(transferRouter)
-app.use(requestPaymentRouter)
+app.use(adminRouter)
+app.use(paymentRouter)
 
 app.get('/', (req, res) => {
   res.send('Streamlining payments and transactions for efficiency and ease.')

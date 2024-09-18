@@ -37,14 +37,9 @@ const historySchema = new mongoose.Schema({
         ref: "users"
     },
 
-    deposits: {
+    transactions: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "deposits"
-    },
-
-    transfers: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "transfers"
+        ref: "transactions"
     },
 
     receiptID: {
@@ -57,6 +52,6 @@ const historySchema = new mongoose.Schema({
     }
 })
 
-const historyModel = mongoose.model("transactions", historySchema)
+const historyModel = mongoose.model("allTransactions", historySchema)
 
 module.exports = historyModel

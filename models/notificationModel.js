@@ -9,6 +9,10 @@ const notificationSchema = new mongoose.Schema({
     type:String
   },
 
+  expectedAmount:{
+    type: Number
+  },
+
   amountPaid:{
     type: Number
   },

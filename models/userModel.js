@@ -13,6 +13,10 @@ const userSchema = new mongoose.Schema({
         type: String, 
         required: true,
     },
+
+    userName: {
+        type: String
+    },
     
     email: { 
         type: String,
@@ -47,17 +51,17 @@ const userSchema = new mongoose.Schema({
          default: false 
     },
 
-    uniqueID: {
+    wallet: {
+        type: Number,
+        default: 0
+    },
+
+    walletID: {
         type: String
     },
 
     pin: {
         type: String
-    },
-
-    acctBalance: {
-        type: Number,
-        default: 0
     },
 
     emailCount: { 
@@ -71,7 +75,7 @@ const userSchema = new mongoose.Schema({
 
     transactions: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'transactions'
+        ref: 'allTransactions'
     }],
 
     createdOn: {
