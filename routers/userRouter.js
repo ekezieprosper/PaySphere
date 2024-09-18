@@ -2,7 +2,8 @@ const router = require("express").Router()
 
 const {
     signUp_user, 
-    logIn, logOut,
+    logIn, 
+    logOut,
     createProfileImg, 
     deleteProfileImg,  
     changePassword, 

@@ -110,8 +110,8 @@ const requestEmail = (name, amount, paymentLink, denyLink, Email) => {
                 <a href="${paymentLink}" class="button pay-button">Pay Now</a>
                 <a href="${denyLink}" class="button reject-button">Reject</a>
             </div>
-             <p style="text-align: left; margin-top: 15px;">By clicking the link, the requested amount will automatically be deducted from your account and transferred</p>
-            <p>to <b>${name}'s</b> account if you have sufficient funds.</p>
+             <p style="text-align: left; margin-top: 15px;">By clicking the link, the requested amount will automatically be deducted from your wallet and transferred</p>
+            <p>to <b>${name}'s</b> wallet if you have sufficient funds.</p>
             <hr style="margin: 15px 0;">
             <footer style="text-align: center; color: #999; font-size: 10px;">
                 <p>© ${new Date().getFullYear()} PaySphere.ltd, 203 Muyibi Road</p>
@@ -123,4 +123,4 @@ const requestEmail = (name, amount, paymentLink, denyLink, Email) => {
     `;
 }
 
-module.exports = { requestEmail };
+module.exports = { requestEmail }

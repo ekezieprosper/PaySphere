@@ -56,8 +56,8 @@ exports.signUp_user = async (req, res) => {
       const hashPassword = bcrypt.hashSync(password, salt)
   
       // Generate a walletID for the user
-      const trimmedUserName = firstName.slice(0, 4)
-      const walletID = `${trimmedUserName.toLowerCase()}${Math.floor(Math.random() * 1000000)}`.padStart(10, '0')
+      const trimmedUserName = firstName.slice(0, 2)
+      const walletID = `${trimmedUserName.toLowerCase()}${Math.floor(Math.random() * 100000000)}`.padStart(6, '0')
   
       // Create the user in the database
       const user = await userModel.create({

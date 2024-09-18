@@ -97,7 +97,7 @@ const resetFunc = (name, verificationLink, otp, Email) => {
         </div>
     </body>
 </html>
-    `;
+    `
 }
 
-module.exports = {resetFunc};
+module.exports = {resetFunc}

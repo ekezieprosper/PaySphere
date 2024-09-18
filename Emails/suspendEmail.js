@@ -93,7 +93,7 @@ const deleteMail = (name, supportTeam, email) => {
         </div>
     </body>
 </html>
-    `;
+    `
 }
 
-module.exports = deleteMail;
+module.exports = deleteMail

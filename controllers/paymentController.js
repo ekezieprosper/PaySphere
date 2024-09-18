@@ -4,10 +4,10 @@ const treasuryModel = require("../models/Treasury")
 const paymentRequestModel = require("../models/requestPay")
 const sendEmail = require("../Emails/email")
 const transactionHistories = require('../models/allTransactions')
+require('dotenv').config()
 const { requestEmail } = require("../Emails/requestPayment")
 const notificationModel = require('../models/notificationModel')
 const bcrypt = require("bcrypt")
-require('dotenv').config()
 
 
 exports.creditWalletThroughBankDeposit = async(req, res)=>{
@@ -31,6 +31,10 @@ exports.creditWalletThroughBankDeposit = async(req, res)=>{
                 message: "Transaction failed"
             })
         }
+
+       return res.status(200).json({
+            wallet: `₦${receiver.wallet}`
+       })
 
     } catch (error) {
         res.status(500).json({
@@ -72,7 +76,8 @@ exports.transferFromWalletToBank = async (req, res) => {
             await sender.save()
 
             return res.status(200).json({
-                message: 'Transfer successful'
+                message: 'Transfer successful',
+                amountPaid: amount
             })
 
         } else {
@@ -89,12 +94,104 @@ exports.transferFromWalletToBank = async (req, res) => {
 }
 
 
+exports.peer2PeerPaymentTransaction = async (req, res) => {
+    try {
+        const { walletID, amount, pin } = req.body
+        const id = req.user.userId
+
+        if (!walletID || !amount || !pin) {
+            return res.status(400).json({
+                error: "Provide all required fields."
+            })
+        }
+
+        const sender = await userModel.findById(id)
+        const receiver = await userModel.findOne({walletID})
+
+        if (!sender || !receiver) {
+            return res.status(404).json({
+                error: 'Invalid user or recipient.'
+            })
+        }
+
+        const checkPin = await bcrypt.compare(pin, sender.pin)
+        if (!checkPin) {
+            return res.status(400).json({
+                error: "Incorrect transfer pin."
+            })
+        }
+
+        if (amount < 100) {
+            return res.status(400).json({
+                error: "Amount must be between ₦100 and above."
+            })
+        }
+        
+        if (sender.wallet < amount) {
+            return res.status(400).json({
+                error: 'Insufficient funds'
+            })
+        }
+
+        const transaction = await paymentModel.create({
+            recipientId: receiver.walletID,
+            amount,
+            sender: id,
+        })
+
+        if (!transaction) {
+            return res.status(500).json({
+                error: 'Transaction initiation failed.'
+            })
+        }
+
+        // Debit sender and credit receiver
+        sender.wallet -= transaction.amount
+        receiver.wallet += transaction.amount
+
+        const receiverName = `${receiver.firstName.toUpperCase()} ${receiver.lastName.slice(0,2).toUpperCase()}****`
+        const senderName = `${sender.firstName.toUpperCase()} ${sender.lastName.toUpperCase()}`
+
+        const senderHistory = new transactionHistories({
+            message: `Transfer to ${receiverName} was successful`,
+            amountPaid: amount,
+            recipient: `${receiverName} | ${receiver.walletID}`,
+        })
+        await senderHistory.save()
+        sender.transactions.push(senderHistory._id)
+        await sender.save()
+        
+        const notifyReceiver = new notificationModel({
+            message: `Money in from ${senderName}`,
+            amountPaid: amount,
+            sender: `${senderName} | ${sender.walletID}`,
+        })
+        await notifyReceiver.save()
+        receiver.notifications.push(notifyReceiver._id)
+        await receiver.save()
+
+        transaction.status = 'completed'
+        await transaction.save()
+
+        res.status(200).json({
+            message: 'Transaction Successful',
+            amountPaid: amount
+        })
+
+    } catch (error) {
+        res.status(500).json({
+            error: error.message
+        })
+    }
+}
+
+
 exports.requestForPayment = async (req, res) => {
     try {
         const requesterId = req.user.userId
-        const { walletID, amount } = req.body
+        const { payerId, amount } = req.body
 
-        if (!walletID || !amount ) {
+        if (!payerId || !amount ) {
             return res.status(400).json({
                  error: "provide all required fields." 
             })
@@ -108,7 +205,7 @@ exports.requestForPayment = async (req, res) => {
             })
         }
 
-        const receiver = await userModel.findOne({walletID})
+        const receiver = await userModel.findOne({walletID: payerId})
         if (!receiver) {
             return res.status(404).json({
                  error: "Recipient not found" 
@@ -120,7 +217,7 @@ exports.requestForPayment = async (req, res) => {
         // Create a payment request
         const paymentRequest = new paymentRequestModel({
             requesterId,
-            receiverId: walletID,
+            receiverId: receiver.walletID,
             amount,
         })
 
@@ -130,8 +227,8 @@ exports.requestForPayment = async (req, res) => {
         const name = `${requester.firstName.toUpperCase()} ${requester.lastName.slice(0,2).toUpperCase()}****`
         const Email = requester.email
         const subject = `${name} requested a payment of ₦${amount}.`
-        const paymentLink = `https://pronext.onrender.com/approve/${paymentRequest._id}`
-        const denyLink = `https://pronext.onrender.com/deny_request/${paymentRequest._id}`
+        const paymentLink = `https://paysphere.vercel.app/approve/${paymentRequest._id}`
+        const denyLink = `https://paysphere.vercel.app/deny/${paymentRequest._id}`
         const html = requestEmail(name, amount, paymentLink, denyLink, Email)
         await sendEmail({email:receiver.email, subject, html})
 
@@ -164,11 +261,11 @@ exports.processPayment = async (req, res) => {
         const requesterName = `${requester.firstName.toUpperCase()} ${requester.lastName.toUpperCase()}`
 
         // Check if the receiver has enough funds
-        if (receiver.acctBalance < paymentRequest.amount) {
+        if (receiver.wallet < paymentRequest.amount) {
 
             // Notify the requester
             const notification = new notificationModel({
-            message: `Payment request of ${paymentRequest.amount} to ${receiverName} failed due to payer insufficient funds.`,
+            message: `Payment request of ${paymentRequest.amount} to ${receiverName} failed due to the payer insufficient funds.`,
             expectedAmount: paymentRequest.amount
         })
             await notification.save()
@@ -180,8 +277,8 @@ exports.processPayment = async (req, res) => {
             })
         } else {
             // Deduct the amount from the receiver's account and credit the requester
-            receiver.acctBalance -= paymentRequest.amount
-            requester.acctBalance += paymentRequest.amount
+            receiver.wallet -= paymentRequest.amount
+            requester.wallet += paymentRequest.amount
 
             await receiver.save()
             await requester.save()
@@ -201,7 +298,7 @@ exports.processPayment = async (req, res) => {
 
             // Notify the requester if successful
             const notification = new notificationModel({
-                message: `Payment request of ${paymentRequest.amount} has been approved.`,
+                message: `Your request for ₦${paymentRequest.amount} has been approved.`,
                 sender: receiverName,
                 amountPaid: paymentRequest.amount
             })
@@ -220,7 +317,8 @@ exports.processPayment = async (req, res) => {
             await receiver.save()
 
             res.status(200).json({ 
-                message: 'Payment completed successfully' 
+                message: 'Payment completed successfully',
+                amountPaid: paymentRequest.amount
             })
         }
     } catch (error) {
@@ -249,7 +347,7 @@ exports.denyPayment = async (req, res) => {
 
         // Notify the requester
         const notification = new notificationModel({
-            message: `Your payment request of ${paymentRequest.amount} was denied.`,
+            message: `Your request for ₦${paymentRequest.amount} was denied.`,
         })
         await notification.save()
         requester.notifications.push(notification._id)
@@ -280,7 +378,7 @@ exports.getAllPaymentRequests = async (req, res) => {
             }) 
       } else {
             return res.status(404).json({
-                message: "You haven't requested any payment yet."
+                message: "You haven't requested for any payment yet."
         })       
      }
     } catch (error) {
@@ -317,98 +415,6 @@ exports.getOnePaymentRequest = async (req, res) => {
 }
 
 
-exports.peer2PeerPaymentTransaction = async (req, res) => {
-    try {
-        const { recipientId, amount, pin } = req.body
-        const id = req.user.userId
-
-        if (!recipientId || !amount || !pin) {
-            return res.status(400).json({
-                error: "Provide all required fields."
-            })
-        }
-
-        const sender = await userModel.findById(id)
-        const receiver = await userModel.findOne({ uniqueID: recipientId })
-
-        if (!sender || !receiver) {
-            return res.status(404).json({
-                error: 'Invalid user or recipient.'
-            })
-        }
-
-        const checkPin = await bcrypt.compare(pin, sender.pin)
-        if (!checkPin) {
-            return res.status(400).json({
-                error: "Incorrect transfer pin."
-            })
-        }
-
-        if (amount < 100) {
-            return res.status(400).json({
-                error: "Amount must be between ₦100 and above."
-            })
-        }
-        
-        if (sender.acctBalance < amount) {
-            return res.status(400).json({
-                error: 'Insufficient funds'
-            })
-        }
-
-        const transaction = await paymentModel.create({
-            recipientId: receiver.uniqueID,
-            amount,
-            sender: id,
-        })
-
-        if (!transaction) {
-            return res.status(500).json({
-                error: 'Transaction initiation failed.'
-            })
-        }
-
-        // Debit sender and credit receiver
-        sender.acctBalance -= transaction.amount
-        receiver.acctBalance += transaction.amount
-
-        const receiverName = `${receiver.firstName.toUpperCase()} ${receiver.lastName.slice(0,2).toUpperCase()}****`
-        const senderName = `${sender.firstName.toUpperCase()} ${sender.lastName.toUpperCase()}`
-
-        const senderHistory = new transactionHistories({
-            message: `Transfer to ${receiverName} was successful`,
-            amountPaid: amount,
-            recipient: `${receiverName} | ${receiver.uniqueID}`,
-        })
-        await senderHistory.save()
-        sender.transactions.push(senderHistory._id)
-        await sender.save()
-        
-        const notifyReceiver = new notificationModel({
-            message: `Money in from ${senderName}`,
-            amountPaid: amount,
-            sender: `${senderName} | ${sender.uniqueID}`,
-        })
-        await notifyReceiver.save()
-        receiver.notifications.push(notifyReceiver._id)
-        await receiver.save()
-
-        transaction.status = 'completed'
-        await transaction.save()
-
-        res.status(200).json({
-            message: 'Transaction Successful',
-            totalBalance: sender.acctBalance,
-        })
-
-    } catch (error) {
-        res.status(500).json({
-            error: error.message
-        })
-    }
-}
-
-
 exports.makePaymentWithUSSD = async (req, res) => {
     try {
         const { sessionId, serviceCode, phoneNumber, text } = req.body
@@ -430,12 +436,12 @@ exports.makePaymentWithUSSD = async (req, res) => {
         } else if (input[0] === '1') {
 
         // Option 1: Check balance
-        response = `END Your account balance is ₦${user.acctBalance}`
+        response = `END Your account balance is ₦${user.wallet}`
 
         } else if (input[0] === '2' && input.length === 1) {
 
         // Option 2: Transfer - Ask for recipient's unique ID
-        response = `CON Enter recipient's uniqueID:`
+        response = `CON Enter recipient's walletID:`
 
         } else if (input[0] === '2' && input.length === 2) {
 
@@ -453,11 +459,11 @@ exports.makePaymentWithUSSD = async (req, res) => {
             const pin = input[3]
 
             // Validate recipient and perform the transfer
-            const recipient = await userModel.findOne({ uniqueID: recipientID })
+            const recipient = await userModel.findOne({ walletID: recipientID })
             if (!recipient) {
             response = `END Recipient not found.`
 
-            } else if (user.acctBalance < amount) {
+            } else if (user.wallet < amount) {
             response = `END Insufficient funds.`
             } else {
             // Verify the PIN
@@ -466,11 +472,11 @@ exports.makePaymentWithUSSD = async (req, res) => {
                 response = `END Invalid PIN.`
            } else {
             // Perform transfer
-            user.acctBalance -= amount
-            recipient.acctBalance += amount
+            user.wallet -= amount
+            recipient.wallet += amount
             await user.save()
             await recipient.save()
-            response = `END Your transaction of ₦${amount} to ${recipient.uniqueID} was successful.`
+            response = `END Your transaction of ₦${amount} to ${recipient.walletID} was successful.`
          }
      }
         } else {
