@@ -135,10 +135,10 @@ const changePasswordValidation = (req, res, next) => {
 
 const loginValidation = (req, res, next) => {
   const login = Joi.object({
-    walletID:  Joi.string().required().messages({
-      'string.base': 'walletID must be a string',
-      'string.empty': 'Enter your user ID',
-      'any.required': 'walletID is required'
+    uniqueID:  Joi.string().required().messages({
+      'string.base': 'unique ID must be a string',
+      'string.empty': 'Enter your unique ID',
+      'any.required': 'unique ID is required'
     }),
     password:  Joi.string().required().messages({
       'string.base': 'Password must be a string',
@@ -147,9 +147,9 @@ const loginValidation = (req, res, next) => {
     }),  
   })
 
-  const { walletID, password } = req.body
+  const { uniqueID, password } = req.body
 
-  const { error } = login.validate({walletID, password})
+  const { error } = login.validate({uniqueID, password})
 
   if (error) {
     const errors = error.details.map(detail => detail.message)

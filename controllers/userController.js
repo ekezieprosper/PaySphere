@@ -142,7 +142,7 @@ exports.logIn = async (req, res) => {
   }
 
 
-  exports.createTransactionPin = async(req, res)=>{
+exports.createTransactionPin = async(req, res)=>{
     try {
         const id = req.user.userId
         const {pin} = req.body
