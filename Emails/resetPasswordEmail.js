@@ -6,7 +6,7 @@ const resetFunc = (name, verificationLink, otp, Email) => {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Welcome to PaySphere</title>
+    <title>Password Reset - PaySphere</title>
     <style>
         body, table, td, a {
             -webkit-text-size-adjust: 100%;
@@ -43,26 +43,26 @@ const resetFunc = (name, verificationLink, otp, Email) => {
             height: auto;
         }
         .header h1 {
-            font-size: 20px; /* Smaller header text */
+            font-size: 20px;
             color: #333333;
             margin-top: 10px;
         }
         .content {
-            font-size: 14px; /* Smaller content text */
+            font-size: 14px;
             color: #333333;
         }
         .content p {
             margin: 0 0 15px 0;
         }
-        .unique-id {
+        .otp {
             text-align: center;
-            font-size: 20px; /* Smaller unique ID text */
-            font-weight: bold;
-            color: #28a745;
+            font-size: 17px;
+            letter-spacing: 5px;
+            color: #333;
             margin: 20px 0;
         }
         .footer {
-            font-size: 10px; /* Smaller footer text */
+            font-size: 10px;
             color: #888888;
             text-align: center;
             margin-top: 30px;
@@ -73,31 +73,69 @@ const resetFunc = (name, verificationLink, otp, Email) => {
             color: #888888;
             text-decoration: none;
         }
+        .button {
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: #007bff;
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 14px;
+            border-radius: 4px;
+            margin: 20px 0;
+            width: 60%;
+            max-width: 250px;
+            text-align: center;
+        }
+        
+        /* Responsive design */
+        @media screen and (max-width: 600px) {
+            .email-container {
+                padding: 10px;
+            }
+            .header h1 {
+                font-size: 18px;
+            }
+            .content {
+                font-size: 12px;
+            }
+            .otp {
+                font-size: 22px;
+                letter-spacing: 4px;
+            }
+            .button {
+                font-size: 12px;
+                padding: 6px 12px;
+                max-width: 200px;
+            }
+            .footer {
+                font-size: 8px;
+            }
+        }
     </style>
 </head>
- <body>
-       <div style="font-family: Arial, sans-serif; max-width: 480px; margin: auto; padding: 10px;">
-                <img src="https://res.cloudinary.com/da9fesl0x/image/upload/v1724452088/pj2mmfdp9conop8774ct.jpg" alt="Pronext Logo" width="156" height="100">
-                <div style="text-align: center; margin-bottom: 15px;">
-            </div>
-            <div style="text-align: left;">
-            <p>We received a request to reset the password for your account <b>${name}.</b></p>
-            <p>Use the opt code below to reset your password. Expires in <b>10 minutes</b>.</p>
-             </div>
-             <h2 style="text-align: left; font-size: 28px; letter-spacing: 5px; color: #333;">${otp}</h2>
-             <p style="text-align: left; margin-top: 15px;">Alternatively, you can directly reset your password</p>
-            <div style="text-align: left;">
-                <a href="${verificationLink}" class="button" style="display: inline-block; padding: 8px 16px; width: 250px; text-align: center; background-color: green; color: #ffffff; text-decoration: none; font-size: 14px; border-radius: 4px;">Reset Password</a>
-            </div>
-            <hr style="margin: 15px 0;">
-            <footer style="text-align: center; color: #999; font-size: 10px;">
-                <p>© ${new Date().getFullYear()} PaySphere.ltd, 203 Muyibi Road</p>
-                <p>This message was sent to <a href="mailto:${Email}" style="color: #999;">${Email}</a>.</p>
-            </footer>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <h1>Password Reset</h1>
         </div>
-    </body>
+        <div class="content">
+            <p>Hello <b>${name}</b>,</p>
+            <p>We received a request to reset your account password.</p>
+            <p>Use the OTP code below to reset your password. Please do not share this code with anyone. The code will expire in 10 minutes:  ${otp}</p>
+        </div>
+        <p>Alternatively, you can directly reset your password by clicking the button below:</p>
+        <div>
+            <a href="${verificationLink}" class="button">Reset Password</a>
+        </div>
+        <hr style="margin: 15px 0;">
+        <footer>
+            <p>© ${new Date().getFullYear()} PaySphere.ltd. 203 Muyibi Road</p>
+            <p>This message was sent to <a href="mailto:${Email}" style="color: #999;">${Email}</a>.</p>
+        </footer>
+    </div>
+</body>
 </html>
-    `
+    `;
 }
 
-module.exports = {resetFunc}
+module.exports = { resetFunc };

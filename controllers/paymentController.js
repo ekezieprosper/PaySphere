@@ -10,9 +10,18 @@ const notificationModel = require('../models/notificationModel')
 const bcrypt = require("bcrypt")
 
 
+
 exports.creditWalletThroughBankDeposit = async(req, res)=>{
     try {
+        const id = req.user.userId
         const {walletID, amount} = req.body
+
+        const user = await userModel.findById(id)
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found"
+            })
+        }
 
         const receiver = await userModel.findOne({walletID})
         if (receiver) {
@@ -46,9 +55,15 @@ exports.creditWalletThroughBankDeposit = async(req, res)=>{
 
 exports.transferFromWalletToBank = async (req, res) => {
     try {
-        const { walletID, amount } = req.body
+        const id = req.user.userId
+        const {amount} = req.body
 
-        const sender = await userModel.findOne({ walletID })
+        const sender = await userModel.findById(id)
+        if (!sender) {
+            return res.status(404).json({
+                message: "Sender not found"
+            })
+        }
 
         const fee = 10
 
@@ -56,7 +71,7 @@ exports.transferFromWalletToBank = async (req, res) => {
         if (sender.wallet >= amount + fee) {  
 
             const deposit = new paymentModel({
-                recipientId: walletID,
+                senderId: id,
                 amount: amount,
                 status: 'completed'
             })

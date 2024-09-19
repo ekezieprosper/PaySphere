@@ -13,8 +13,8 @@ const {
 
 const authenticate = require("../auth/userAuth")
 
-router.post("/credit_wallet/bank", creditWalletThroughBankDeposit)
-router.post("/transfer_to_bank", transferFromWalletToBank)
+router.post("/credit_wallet/bank", authenticate, creditWalletThroughBankDeposit)
+router.post("/transfer_to_bank", authenticate, transferFromWalletToBank)
 router.post("/request_payment", authenticate, requestForPayment)
 router.post("/approve/:paymentRequestId", processPayment)
 router.post("/deny/:paymentRequestId", denyPayment)
@@ -24,4 +24,3 @@ router.post("/USSDpayment/transfer", makePaymentWithUSSD)
 router.post("/transfer_to_user", authenticate, peer2PeerPaymentTransaction)
 
 module.exports = router
-

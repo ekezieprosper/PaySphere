@@ -6,7 +6,7 @@ const requestEmail = (name, amount, paymentLink, denyLink, Email) => {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Welcome to PaySphere</title>
+    <title>Payment Request from PaySphere</title>
     <style>
         body, table, td, a {
             -webkit-text-size-adjust: 100%;
@@ -75,15 +75,15 @@ const requestEmail = (name, amount, paymentLink, denyLink, Email) => {
         }
         .button-container {
             display: flex;
-            justify-content: flex-start; /* Align buttons horizontally */
-            gap: 5%; /* Spacing between buttons */
+            justify-content: space-between; /* Align buttons horizontally with space between */
+            gap: 10px; /* Add space between buttons */
             margin-top: 15px;
         }
         .button {
-            padding: 8px 16px; /* Reduced button padding */
-            width: 100px; /* Reduced width */
+            padding: 10px 20px; /* Adjusted button padding */
+            flex-grow: 1; /* Allows buttons to take equal width */
             text-align: center;
-            font-size: 14px; /* Reduced font size */
+            font-size: 14px; /* Adjust font size */
             border-radius: 4px;
         }
         .pay-button {
@@ -96,22 +96,40 @@ const requestEmail = (name, amount, paymentLink, denyLink, Email) => {
             color: white;
             text-decoration: none;
         }
+        
+        /* Media Queries for mobile responsiveness */
+        @media screen and (max-width: 600px) {
+            .email-container {
+                padding: 10px;
+            }
+            .content p, .footer {
+                font-size: 12px; /* Adjust font size for smaller screens */
+            }
+            .button-container {
+                flex-direction: column; /* Stack buttons vertically on small screens */
+                align-items: center;
+            }
+            .button {
+                width: 100%; /* Make buttons full-width on small screens */
+                margin-bottom: 10px; /* Add margin between stacked buttons */
+            }
+        }
     </style>
 </head>
  <body>
+        <div class="email-container">
             <div style="text-align: left;">
-            <p>You've received a payment request from <b>${name}.</b></p>
-            <p>Details of the Payment Request:</p>
-            <p>Amount: ₦${amount}</p>
-            <p>Sender: ${name}</p>
-             </div>
-             <p style="text-align: left; margin-top: 15px;">Click the link below to complete payment or deny</p>
+                <p>You've received a payment request from <b>${name}</b>.</p>
+                <p>Details of the Payment Request:</p>
+                <p>Amount: ₦${amount}</p>
+                <p>Sender: ${name}</p>
+            </div>
+            <p style="text-align: left; margin-top: 15px;">Click the link below to complete payment or deny it.</p>
             <div class="button-container">
                 <a href="${paymentLink}" class="button pay-button">Pay Now</a>
                 <a href="${denyLink}" class="button reject-button">Reject</a>
             </div>
-             <p style="text-align: left; margin-top: 15px;">By clicking the link, the requested amount will automatically be deducted from your wallet and transferred</p>
-            <p>to <b>${name}'s</b> wallet if you have sufficient funds.</p>
+            <p style="text-align: left; margin-top: 15px;">By clicking the link, the requested amount will automatically be deducted from your wallet and transferred to <b>${name}'s</b> wallet if you have sufficient funds.</p>
             <hr style="margin: 15px 0;">
             <footer style="text-align: center; color: #999; font-size: 10px;">
                 <p>© ${new Date().getFullYear()} PaySphere.ltd, 203 Muyibi Road</p>
@@ -120,7 +138,7 @@ const requestEmail = (name, amount, paymentLink, denyLink, Email) => {
         </div>
     </body>
 </html>
-    `;
+    `
 }
 
 module.exports = { requestEmail }

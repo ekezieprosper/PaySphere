@@ -1,6 +1,5 @@
 const restoreMail = (name, logIn,  supportTeam, email) => {
-    return `
-   <!DOCTYPE html>
+    return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -73,27 +72,48 @@ const restoreMail = (name, logIn,  supportTeam, email) => {
             color: #888888;
             text-decoration: none;
         }
+        @media only screen and (max-width: 600px) {
+            .email-container {
+                padding: 10px;
+                box-shadow: none;
+            }
+            .header h1 {
+                font-size: 18px;
+            }
+            .content {
+                font-size: 12px;
+            }
+            .unique-id {
+                font-size: 18px;
+            }
+            .footer {
+                font-size: 8px;
+            }
+        }
     </style>
 </head>
 <body>
-       <div style="font-family: Arial, sans-serif; max-width: 480px; margin: auto; padding: 10px;">
-            <div style="text-align: center; margin-bottom: 15px;">
-                <h2 style="font-size: 18px; color: #000; font-family: 'Helvetica Neue', sans-serif;">Your account has been restored 🥳🎊</h2>
-            </div>
-            <div style="text-align: left;">
-             <p><b>${name}</b>, Your account has been restored after a careful review. Please sign in to continue.</p>
-             <p style="text-align: center;"><a href="${logIn}" class="button" style="display: inline-block; padding: 8px 16px; background-color: blue; color: #ffffff; text-decoration: none; font-size: 14px; border-radius: 4px;">sign in</a></p>
-             <p>For more information, feel free to contact our support team <a href="mailto:${supportTeam}" style="color: #007bff; text-decoration: underline;">support team</a>. We are here to help you resolve this matter as quickly as possible.</p>
-             </div>
-            <hr style="margin: 15px 0;">
-            <footer style="text-align: center; color: #999; font-size: 8px;">
-                <p>© ${new Date().getFullYear()} PaySphere.ltd, 203 Muyibi Road</p>
-                <p>This message was sent to <a href="mailto:${email}" style="color: #999;">${email}</a>.</p>
-            </footer>
+    <div class="email-container">
+        <div class="header">
+            <img src="logo.png" alt="PaySphere Logo">
+            <h1>Welcome to PaySphere</h1>
         </div>
-    </body>
-</html>
-    `
+        <div class="content">
+            <h2>Your account has been restored 🥳🎊</h2>
+            <p><b>${name}</b>, Your account has been restored after a careful review. Please sign in to continue.</p>
+            <p style="text-align: center;">
+                <a href="${logIn}" class="button" style="display: inline-block; padding: 8px 16px; background-color: blue; color: #ffffff; text-decoration: none; font-size: 14px; border-radius: 4px;">Sign In</a>
+            </p>
+            <p>For more information, feel free to contact our support team <a href="mailto:${supportTeam}" style="color: #007bff; text-decoration: underline;">support team</a>. We are here to help you resolve this matter as quickly as possible.</p>
+        </div>
+        <hr style="margin: 15px 0;">
+        <footer class="footer">
+            <p>© ${new Date().getFullYear()} PaySphere.ltd, 203 Muyibi Road</p>
+            <p>This message was sent to <a href="mailto:${email}" style="color: #999;">${email}</a>.</p>
+        </footer>
+    </div>
+</body>
+</html> `
 }
 
 module.exports = restoreMail

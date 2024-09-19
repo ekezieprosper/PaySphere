@@ -1,4 +1,4 @@
-const DynamicEmail = (walletID, verificationLink, email) => {
+const DynamicEmail = (name, walletID, verificationLink, email) => {
     return `
    <!DOCTYPE html>
 <html lang="en">
@@ -16,9 +16,6 @@ const DynamicEmail = (walletID, verificationLink, email) => {
         }
         table, td {
             border-collapse: collapse;
-        }
-        img {
-            -ms-interpolation-mode: bicubic;
         }
         body {
             background-color: #f4f4f4;
@@ -43,12 +40,12 @@ const DynamicEmail = (walletID, verificationLink, email) => {
             height: auto;
         }
         .header h1 {
-            font-size: 20px; /* Smaller header text */
+            font-size: 20px;
             color: #333333;
             margin-top: 10px;
         }
         .content {
-            font-size: 14px; /* Smaller content text */
+            font-size: 14px;
             color: #333333;
         }
         .content p {
@@ -56,13 +53,13 @@ const DynamicEmail = (walletID, verificationLink, email) => {
         }
         .unique-id {
             text-align: center;
-            font-size: 20px; /* Smaller unique ID text */
+            font-size: 20px;
             font-weight: bold;
             color: #28a745;
             margin: 20px 0;
         }
         .footer {
-            font-size: 10px; /* Smaller footer text */
+            font-size: 10px;
             color: #888888;
             text-align: center;
             margin-top: 30px;
@@ -73,20 +70,48 @@ const DynamicEmail = (walletID, verificationLink, email) => {
             color: #888888;
             text-decoration: none;
         }
+        .button {
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        /* Media Queries for mobile responsiveness */
+        @media screen and (max-width: 600px) {
+            .email-container {
+                width: 100% !important;
+                padding: 10px;
+            }
+            .content p, .footer {
+                font-size: 12px;
+            }
+            .header h1 {
+                font-size: 16px;
+            }
+            .unique-id {
+                font-size: 16px;
+            }
+            .button {
+                padding: 8px 16px;
+                font-size: 12px;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="email-container">
-        <div class="header">
-            <img src="https://res.cloudinary.com/da9fesl0x/image/upload/v1726019240/acvmwiignhgssxbst1bw.jpg" alt="PaySphere Logo">
-        </div>
+       <h4>Hi ${name},</h4>
         <div class="content">
-            <p>Thank you for joining PaySphere! We are delighted to have you on board. Our platform is designed to offer a range of payment solutions that make transactions seamless and efficient. Whether you’re making payments or selling products, we aim to provide a smooth and secure experience.</p>
-            <p>This <b style="font-size: 16px; letter-spacing: 2px; color: #333;">${walletID}</b> is your wallet(unique) ID for account access, and will also be required for both login and transactions. Click the button below to get started.</p>
+            <p>Thank you for joining PaySphere! We’re excited to have you on board. Our platform offers a variety of payment solutions designed to make transactions seamless and efficient. Whether you’re making payments or selling products, we aim to provide a smooth, secure experience.</p>
+            <p>Your wallet ID is: <b style="font-size: 16px; color: #333;">${walletID}</b>. You’ll need this ID to access your account and some other transactions.</p>
+            <p>Click the button below to get started:</p>
+            <a href="${verificationLink}" class="button">Get started</a>
         </div>
-         <div style="text-align: center;">
-                <a href="${verificationLink}" class="button" style="display: inline-block; padding: 8px 16px; background-color: blue; color: #ffffff; text-decoration: none; font-size: 14px; border-radius: 4px;">Get started</a>
-            </div>
         <div class="footer">
             <p>© ${new Date().getFullYear()} PaySphere.ltd, 203 Muyibi Road</p>
             <p>This email was sent to <a href="mailto:${email}">${email}</a>. If you did not create an account with us, please ignore this message.</p>
@@ -94,7 +119,7 @@ const DynamicEmail = (walletID, verificationLink, email) => {
     </div>
 </body>
 </html>
-    `;
+    `
 }
 
-module.exports = DynamicEmail;
+module.exports = DynamicEmail

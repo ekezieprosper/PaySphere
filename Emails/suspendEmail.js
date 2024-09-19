@@ -43,26 +43,19 @@ const deleteMail = (name, supportTeam, email) => {
             height: auto;
         }
         .header h1 {
-            font-size: 20px; /* Smaller header text */
+            font-size: 20px; /* Header text size */
             color: #333333;
             margin-top: 10px;
         }
         .content {
-            font-size: 14px; /* Smaller content text */
+            font-size: 14px; /* Content text size */
             color: #333333;
         }
         .content p {
             margin: 0 0 15px 0;
         }
-        .unique-id {
-            text-align: center;
-            font-size: 20px; /* Smaller unique ID text */
-            font-weight: bold;
-            color: #28a745;
-            margin: 20px 0;
-        }
         .footer {
-            font-size: 10px; /* Smaller footer text */
+            font-size: 10px; /* Footer text size */
             color: #888888;
             text-align: center;
             margin-top: 30px;
@@ -73,27 +66,48 @@ const deleteMail = (name, supportTeam, email) => {
             color: #888888;
             text-decoration: none;
         }
+
+        /* Media queries for responsiveness */
+        @media only screen and (max-width: 600px) {
+            .email-container {
+                width: 100% !important;
+                padding: 10px;
+            }
+            .header h1 {
+                font-size: 16px; /* Smaller header text for mobile */
+            }
+            .content {
+                font-size: 12px; /* Smaller content text for mobile */
+            }
+            .footer {
+                font-size: 8px; /* Smaller footer text for mobile */
+            }
+            img {
+                width: 100px; /* Adjust logo size for mobile */
+                height: auto;
+            }
+        }
     </style>
 </head>
 <body>
-       <div style="font-family: Arial, sans-serif; max-width: 480px; margin: auto; padding: 10px;">
-                <img src="https://res.cloudinary.com/da9fesl0x/image/upload/v1724452088/pj2mmfdp9conop8774ct.jpg" alt="PaySphere Logo" width="156" height="100">
-            <div style="text-align: center; margin-bottom: 15px;">
-                <h2 style="font-size: 18px; color: #000; font-family: 'Helvetica Neue', sans-serif;">Your account has been suspended for 365 days.</h2>
+       <div class="email-container">
+            <div class="header">
+                <img src="https://res.cloudinary.com/da9fesl0x/image/upload/v1724452088/pj2mmfdp9conop8774ct.jpg" alt="PaySphere Logo">
+                <h1>Your account has been suspended for 365 days.</h1>
             </div>
-            <div style="text-align: left;">
-             <p><b>${name}</b>, We regret to inform you that your account has been suspended due to violations of our terms and service. This action was taken after careful review and in accordance with our policies to ensure the security and integrity of our platform.</p>
-                    <p>If you believe this is a mistake or have any questions regarding the suspension, please contact our support team for further assistance at <a href="mailto:${supportTeam}" style="color: #007bff; text-decoration: underline;">support team</a>. We are here to help you resolve this matter as quickly as possible.</p>
-             </div>
+            <div class="content">
+                <p><b>${name}</b>, We regret to inform you that your account has been suspended due to violations of our terms and service. This action was taken after careful review and in accordance with our policies to ensure the security and integrity of our platform.</p>
+                <p>If you believe this is a mistake or have any questions regarding the suspension, please contact our support team for further assistance at <a href="mailto:${supportTeam}" style="color: #007bff; text-decoration: underline;">support team</a>. We are here to help you resolve this matter as quickly as possible.</p>
+            </div>
             <hr style="margin: 15px 0;">
-            <footer style="text-align: center; color: #999; font-size: 8px;">
+            <footer class="footer">
                 <p>© ${new Date().getFullYear()} PaySphere.ltd, 203 Muyibi Road</p>
                 <p>This message was sent to <a href="mailto:${email}" style="color: #999;">${email}</a>.</p>
             </footer>
         </div>
     </body>
 </html>
-    `
+    `;
 }
 
-module.exports = deleteMail
+module.exports = deleteMail;

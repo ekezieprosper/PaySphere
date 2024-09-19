@@ -57,7 +57,8 @@ exports.signUp_user = async (req, res) => {
   
       // Generate a walletID for the user
       const trimmedUserName = firstName.slice(0, 2)
-      const walletID = `${trimmedUserName.toLowerCase()}${Math.floor(Math.random() * 100000000)}`.padStart(6, '0')
+      const walletID = `${trimmedUserName.toLowerCase()}${Math.floor(Math.random() * 100000000)}`.padStart(8, '0');
+
   
       // Create the user in the database
       const user = await userModel.create({
@@ -90,12 +91,12 @@ exports.signUp_user = async (req, res) => {
 
 exports.logIn = async (req, res) => {
     try {
-      const { uniqueID, password } = req.body
+      const { walletID, password } = req.body
   
-      const user = await userModel.findOne({walletID : uniqueID})
+      const user = await userModel.findOne({walletID})
       if (!user) {
         return res.status(404).json({
-          error: `User with wallet ID "${uniqueID}" was not found.`
+          error: `User with wallet ID "${walletID}" was not found.`
         })
       }
   
@@ -381,7 +382,7 @@ exports.forgotPassword = async (req, res) => {
         })
 
         // Send email with OTP and verification link
-        const name = `${user.firstName.toUpperCase()} ${user.lastName.slice(0,2).toUpperCase()}****`
+        const name = `${user.firstName.toUpperCase()}`
         const Email = user.email
         const subject = `${otp} is your account recovery code`
         const verificationLink = `https://pronext.onrender.com/reset_password/${user._id}`
@@ -390,7 +391,9 @@ exports.forgotPassword = async (req, res) => {
         const html = resetFunc(name, verificationLink, otp, Email)
         await sendEmail({ email, subject, html })
 
-        return res.redirect(`https://pronext.onrender.com/recover/code/${user._id}`)
+        return res.status(200).json({
+            message: "We've sent you an email"
+        })
     } catch (error) {
         return res.status(500).json({ 
             error: error.message 
@@ -475,7 +478,9 @@ exports.inpute_reset_code = async (req, res) => {
         await OTPModel.findByIdAndDelete(otpRecord._id)
 
         // Redirect the user to the reset password page
-        return res.redirect(`https://pronext.onrender.com/reset_password/${user._id}`)
+        return res.status(200).json({
+            message: "reset password now"
+        })
     } catch (error) {
         return res.status(500).json({
              error: error.message 
