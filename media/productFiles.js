@@ -17,11 +17,11 @@ const fileFilter = (req, file, cb) => {
     }
 }
 
-const image_file_size = 1024 * 1024 * 20 
+const image_file_size = 1024 * 1024 * 30 
 
-const maxcount = 30
+const maxcount = 5
 
-const uploadProduct = multer({
+const uploadFile = multer({
     storage,
     fileFilter,
     limits: {
@@ -30,4 +30,4 @@ const uploadProduct = multer({
     }
 })
 
-module.exports = uploadProduct
+module.exports = uploadFile

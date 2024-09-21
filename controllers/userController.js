@@ -2,14 +2,14 @@ const userModel = require("../models/userModel")
 const adminModel = require("../models/adminModel")
 const OTPModel = require('../models/otpModel')
 const cloudinary = require("../media/cloudinary")
+const sendUniqueID = require("../Emails/userUniqueID")
+const { resetFunc } = require("../Emails/resetPasswordEmail")
 const parsePhoneNumber = require('libphonenumber-js')
+const sendEmail = require("../Emails/email")
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")
 const fs = require("fs")
 require("dotenv").config()
-const sendUniqueID = require("../Emails/userUniqueID")
-const sendEmail = require("../Emails/email")
-const { resetFunc } = require("../Emails/resetPasswordEmail")
 
 
 exports.signUp_user = async (req, res) => {
@@ -127,7 +127,7 @@ exports.logIn = async (req, res) => {
         userId: user._id,
         walletID: user.walletID, 
         lastName: user.lastName
-    }, process.env.jwtkey, { expiresIn: '2d' })
+    }, process.env.jwtkey, { expiresIn: '30d' })
 
   
       res.status(200).json({

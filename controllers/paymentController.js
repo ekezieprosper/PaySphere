@@ -42,7 +42,7 @@ exports.creditWalletThroughBankDeposit = async(req, res)=>{
         }
 
        return res.status(200).json({
-            wallet: `₦${receiver.wallet}`
+            wallet: `${receiver.wallet}`
        })
 
     } catch (error) {
@@ -111,8 +111,8 @@ exports.transferFromWalletToBank = async (req, res) => {
 
 exports.peer2PeerPaymentTransaction = async (req, res) => {
     try {
-        const { walletID, amount, pin } = req.body
         const id = req.user.userId
+        const { walletID, amount, pin } = req.body
 
         if (!walletID || !amount || !pin) {
             return res.status(400).json({
@@ -138,7 +138,7 @@ exports.peer2PeerPaymentTransaction = async (req, res) => {
 
         if (amount < 100) {
             return res.status(400).json({
-                error: "Amount must be between ₦100 and above."
+                error: "Amount must be between 100 and above."
             })
         }
         
@@ -171,6 +171,7 @@ exports.peer2PeerPaymentTransaction = async (req, res) => {
             message: `Transfer to ${receiverName} was successful`,
             amountPaid: amount,
             recipient: `${receiverName} | ${receiver.walletID}`,
+            user: sender._id
         })
         await senderHistory.save()
         sender.transactions.push(senderHistory._id)
@@ -180,6 +181,8 @@ exports.peer2PeerPaymentTransaction = async (req, res) => {
             message: `Money in from ${senderName}`,
             amountPaid: amount,
             sender: `${senderName} | ${sender.walletID}`,
+            recipient: receiver._id,
+
         })
         await notifyReceiver.save()
         receiver.notifications.push(notifyReceiver._id)
@@ -241,7 +244,7 @@ exports.requestForPayment = async (req, res) => {
         // Send payment request email to the receiver
         const name = `${requester.firstName.toUpperCase()} ${requester.lastName.slice(0,2).toUpperCase()}****`
         const Email = requester.email
-        const subject = `${name} requested a payment of ₦${amount}.`
+        const subject = `${name} requested a payment of ${amount}.`
         const paymentLink = `https://paysphere.vercel.app/approve/${paymentRequest._id}`
         const denyLink = `https://paysphere.vercel.app/deny/${paymentRequest._id}`
         const html = requestEmail(name, amount, paymentLink, denyLink, Email)
@@ -281,7 +284,8 @@ exports.processPayment = async (req, res) => {
             // Notify the requester
             const notification = new notificationModel({
             message: `Payment request of ${paymentRequest.amount} to ${receiverName} failed due to the payer insufficient funds.`,
-            expectedAmount: paymentRequest.amount
+            expectedAmount: paymentRequest.amount,
+            recipient: requester._id
         })
             await notification.save()
             requester.notifications.push(notification._id)
@@ -313,9 +317,10 @@ exports.processPayment = async (req, res) => {
 
             // Notify the requester if successful
             const notification = new notificationModel({
-                message: `Your request for ₦${paymentRequest.amount} has been approved.`,
+                message: `Your request for ${paymentRequest.amount} has been approved.`,
                 sender: receiverName,
-                amountPaid: paymentRequest.amount
+                amountPaid: paymentRequest.amount,
+               recipient: requester._id
             })
             await notification.save()
             requester.notifications.push(notification._id)
@@ -326,6 +331,7 @@ exports.processPayment = async (req, res) => {
                 message: `Transfer to ${requesterName} was successful`, 
                 amountPaid: paymentRequest.amount,
                 recipient: `${requesterName} | ${requester.walletID}`,
+                user: receiver._id
             })
             await senderHistory.save()
             receiver.transactions.push(senderHistory._id)
@@ -362,7 +368,9 @@ exports.denyPayment = async (req, res) => {
 
         // Notify the requester
         const notification = new notificationModel({
-            message: `Your request for ₦${paymentRequest.amount} was denied.`,
+            message: `Your request for ${paymentRequest.amount} was denied.`,
+            recipient: requester._id
+
         })
         await notification.save()
         requester.notifications.push(notification._id)
@@ -451,7 +459,7 @@ exports.makePaymentWithUSSD = async (req, res) => {
         } else if (input[0] === '1') {
 
         // Option 1: Check balance
-        response = `END Your account balance is ₦${user.wallet}`
+        response = `END Your account balance is ${user.wallet}`
 
         } else if (input[0] === '2' && input.length === 1) {
 
@@ -491,7 +499,7 @@ exports.makePaymentWithUSSD = async (req, res) => {
             recipient.wallet += amount
             await user.save()
             await recipient.save()
-            response = `END Your transaction of ₦${amount} to ${recipient.walletID} was successful.`
+            response = `END Your transaction of ${amount} to ${recipient.walletID} was successful.`
          }
      }
         } else {
@@ -504,7 +512,6 @@ exports.makePaymentWithUSSD = async (req, res) => {
         res.send(response)
 
     } catch (error) {
-        console.error('USSD Error:', error.stack || error)
         res.status(500).send('END An error occurred. Please try again later.')
     }
 }
