@@ -205,37 +205,43 @@ exports.getProductById = async(req, res)=>{
 }
 
 
-exports.updateProduct = async(req, res)=>{
+exports.updateProduct = async (req, res) => {
     try {
         const id = req.user.userId
-        const {productId} = req.params
+        const { productId } = req.params
         const { description, price, availableStock } = req.body
 
         const product = await productModel.findById(productId)
-         if (product.owner.toString() !== id) {
+        if (!product) {
+            return res.status(404).json({
+                error: "Product not found"
+            })
+        }
+
+        if (product.owner.toString() !== id) {
             return res.status(403).json({
                 error: "Unauthorized."
             })
         }
 
         const updateFields = {}
-        if (description !== undefined) updateFields.description = description
-        if (price !== undefined) updateFields.price = price
-        if (availableStock !== undefined) updateFields.availableStock = availableStock
+        if (description !== undefined && description !== "") updateFields.description = description
+        if (price !== undefined && price !== "" && !isNaN(price)) {
+            updateFields.price = Number(price)
+        }
+        if (availableStock !== undefined && availableStock !== "") updateFields.availableStock = availableStock
 
-        const updateProduct = await productModel.findByIdAndUpdate(productId, updateFields, { new: true })
-        if (!updateProduct) {
-            return res.status(400).json({
-                error: "Unable to update product"
-            })
-        } 
-           
-        return res.status(200).json(updateProduct)
+        if (Object.keys(updateFields).length > 0) {
+            const updatedProduct = await productModel.findByIdAndUpdate(productId, updateFields, { new: true })
+            return res.status(200).json(updatedProduct)
+        }
+
+        return res.status(200).json(product)
 
     } catch (error) {
         res.status(500).json({
             error: error.message
-        }) 
+        })
     }
 }
 
