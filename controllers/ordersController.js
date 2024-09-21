@@ -1,4 +1,30 @@
+const orderModel = require("../models/orderModels")
+const cartModel = require("../models/cartModel")
 
+
+
+exports.checkOut = async(req, res)=>{
+  try {
+    
+  } catch (error) {
+    return res.status(500).json({
+      error: error.message
+    })
+  }
+}
+
+exports.placeOrders = async(req, res)=>{
+  try {
+    const id = req.user.userId
+
+
+    const cart = await cartModel.findOne({buyer: id})
+  } catch (error) {
+    return res.status(500).json({
+      error: error.message
+    })
+  }
+}
 
 
 

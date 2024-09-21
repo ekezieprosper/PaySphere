@@ -11,26 +11,15 @@ const [hour, minute, period] = time.split(/[:\s]/)
 const createdOn = `${date} ${hour}:${minute}${period}`
 
 
-
-const orderItemSchema = new mongoose.Schema({
-  product: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'storeFront'
-  },
-  quantity: Number,
-  price: Number 
-})
-
 const orderSchema = new mongoose.Schema({
-  buyer: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'users',
-    required: true
+  firstName: {
+    type: String
   },
-  items: [orderItemSchema],
-  totalAmount: {
-    type: Number,
+
+  lastname:{
+    type: String
   },
+
 
   status: {
     type: String,
