@@ -6,7 +6,7 @@ const {
        searchForProducts, 
        getProductById, 
        updateProduct, 
-       deleteProduct } = require("../controllers/storeFront")
+       deleteProduct} = require("../controllers/storeFront")
 
 const uploadFile = require("../media/productFiles")
 const authenticate = require("../auth/userAuth")

@@ -3,9 +3,7 @@ const date = new Date().toLocaleString('en-NG', { day: '2-digit', month: 'short'
 const createdOn = `${date}`
 
 
-
 const productSchema = new mongoose.Schema({
-
 
     productName: {
         type: String,
@@ -35,20 +33,12 @@ const productSchema = new mongoose.Schema({
         required: [true, 'input the price of the product'],
       },
 
-    sellingPrice: {
-      type: Number,
-        required: [true, 'input the selling price of the product'],
-    },
-
     category: {
         type: String,
         required: [true, 'what category does your product falls under?'],
     },
 
-    ratings: {
-        type: Number,
-        max: 5
-    },
+    
 
     createdAt: {
       type: String,

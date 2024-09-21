@@ -54,6 +54,7 @@ exports.uploadProduct = async(req, res)=> {
             productName,    
             owner: id,
             price,
+            sellingPrice,
             description,
             availableStock, 
             productImage: Images,
