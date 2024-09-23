@@ -195,7 +195,7 @@ const transferPinValidation = (req, res, next) => {
 
 const payment = (req, res, next) => {
   const validatePayment = Joi.object({
-    email: Joi.string().email({ tlds: { allow: false } }).trim().required().messages({
+    recipientEmail: Joi.string().email({ tlds: { allow: false } }).trim().required().messages({
       'string.base': 'Email must be a string',
       'string.empty': 'Email cannot be empty',
       'string.email': 'Invalid email address',
@@ -209,9 +209,9 @@ const payment = (req, res, next) => {
     })
 })
 
-  const {email, amount} = req.body
+  const {recipientEmail, amount} = req.body
 
-  const { error } = validatePayment.validate({email, amount}, { abortEarly: false })
+  const { error } = validatePayment.validate({recipientEmail, amount}, { abortEarly: false })
   if (error) {
     const errors = error.details.map(detail => detail.message)
     
