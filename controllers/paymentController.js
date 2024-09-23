@@ -111,6 +111,102 @@ exports.transferFromWalletToBank = async (req, res) => {
 }
 
 
+exports.QRcodePaymentDeposit = async(req, res)=>{
+    try {
+        const {id, walletID, amount} = req.body
+
+        const user = await userModel.findById(id)
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found"
+            })
+        }
+
+        const receiver = await userModel.findOne({walletID})
+        if (receiver) {
+            const deposit = new paymentModel({
+                recipientId: walletID,
+                amount: amount,
+                status: 'completed'
+
+            })
+            await deposit.save()
+
+            receiver.wallet += amount
+            await receiver.save()
+        }else{
+            return res.status(404).json({
+                message: "Transaction failed"
+            })
+        }
+
+       return res.status(200).json({
+            wallet: `${receiver.wallet}`
+       })
+
+    } catch (error) {
+        res.status(500).json({
+            error: error.message 
+       })
+    }
+}
+
+
+exports.QRcodePaymentTransfer = async (req, res) => {
+    try {
+        const {id, amount} = req.body
+
+        const sender = await userModel.findById(id)
+        if (!sender) {
+            return res.status(404).json({
+                message: "Sender not found"
+            })
+        }
+
+        const fee = 10
+
+        // Check if sender has sufficient funds
+        if (sender.wallet >= amount + fee) {  
+
+            const deposit = new paymentModel({
+                senderId: id,
+                amount: amount,
+                status: 'completed'
+            })
+            await deposit.save()
+
+            sender.wallet -= (amount + fee)  
+
+            let treasury = await treasuryModel.findOne()
+
+            if (!treasury) {
+                treasury = new treasuryModel({ Balance: fee })
+            } else {
+                treasury.Balance += fee
+            }
+
+            await treasury.save()
+            await sender.save()
+
+            return res.status(200).json({
+                message: 'Transfer successful',
+                amountPaid: amount
+            })
+
+        } else {
+            return res.status(400).json({
+                error: 'Insufficient funds'
+            })
+        }
+        
+    } catch (error) {
+        return res.status(500).json({
+            error: error.message
+        })
+    }
+}
+
+
 exports.peer2PeerPaymentTransaction = async (req, res) => {
     try {
         const id = req.user.userId
@@ -247,8 +343,8 @@ exports.requestForPayment = async (req, res) => {
         const name = `${requester.firstName.toUpperCase()} ${requester.lastName.slice(0,2).toUpperCase()}****`
         const Email = requester.email
         const subject = `${name} requested a payment of ₦${amount}.`
-        const paymentLink = `https://localhost:${port}//approve/${paymentRequest._id}`
-        const denyLink = `https://paysphere.vercel.app/deny/${paymentRequest._id}`
+        const paymentLink = `https://paysphere-api.vercel.app/approve/${paymentRequest._id}`
+        const denyLink = `https://paysphere-api.vercel.app/deny/${paymentRequest._id}`
         const html = requestEmail(name, amount, paymentLink, denyLink, Email)
         await sendEmail({email:receiver.email, subject, html})
 
