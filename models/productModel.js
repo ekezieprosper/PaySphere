@@ -24,21 +24,19 @@ const productSchema = new mongoose.Schema({
         type: Number 
     }, 
     
+    price: {
+      type: Number,
+      required: [true, 'input the price of the product'],
+    },
+
+  category: {
+      type: String,
+      required: [true, 'what category does your product falls under?'],
+  },
+
     productImage: [{
           type: String,
         }],
-
-    price: {
-        type: Number,
-        required: [true, 'input the price of the product'],
-      },
-
-    category: {
-        type: String,
-        required: [true, 'what category does your product falls under?'],
-    },
-
-    
 
     createdAt: {
       type: String,

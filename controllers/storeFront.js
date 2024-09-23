@@ -70,6 +70,65 @@ exports.uploadProduct = async(req, res)=> {
 }
 
 
+exports.getAllProductsOfTheUser = async (req, res) => {
+    try {
+        const { ownerId } = req.params
+        let { limit, page } = req.query
+
+        limit = limit ? parseInt(limit) : 10
+        page = page ? parseInt(page) : 1
+
+        if (isNaN(limit) || limit <= 0 || isNaN(page) || page <= 0) {
+            return res.status(400).json({
+                error: "Invalid limit or page value."
+            })
+        }
+
+        // Count total number of products for the user
+        const totalProducts = await productModel.countDocuments({ owner: ownerId })
+        if (totalProducts === 0) {
+            return res.status(404).json({
+                message: "No product(s) found for this user."
+            })
+        }
+
+        // Calculate total pages
+        const totalPages = Math.ceil(totalProducts / limit)
+        if (page > totalPages) {
+            return res.status(400).json({
+                error: "Page number exceeds total pages."
+            })
+        }
+
+        const skip = (page - 1) * limit
+
+        // Fetch paginated products
+        const products = await productModel.find({ owner: ownerId })
+            .skip(skip)
+            .limit(limit)
+            .exec()
+
+
+        const nextPage = page < totalPages
+        const prevPage = page > 1
+
+        return res.status(200).json({
+            totalProducts,
+            products: products,
+            totalPages,
+            currentPage: page,
+            nextPage,
+            prevPage,
+        })
+
+    } catch (error) {
+        res.status(500).json({
+            error: error.message
+        })
+    }
+}
+
+
 exports.getAllProducts = async (req, res) => {
     try {
 

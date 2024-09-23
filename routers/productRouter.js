@@ -6,13 +6,15 @@ const {
        searchForProducts, 
        getProductById, 
        updateProduct, 
-       deleteProduct} = require("../controllers/storeFront")
+       deleteProduct,
+       getAllProductsOfTheUser} = require("../controllers/storeFront")
 
 const uploadFile = require("../media/productFiles")
 const authenticate = require("../auth/userAuth")
 
 router.post('/upload/product', authenticate, uploadFile.array('productImage', 5), uploadProduct)
 router.get('/get_all/products', getAllProducts)
+router.get("/products/owner/:ownerId", getAllProductsOfTheUser)
 router.get('/search/products', searchForProducts)
 router.get('/get/product/:productId', getProductById)
 router.put('/edit/product/:productId', authenticate, updateProduct)
