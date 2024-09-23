@@ -4,11 +4,13 @@ const treasuryModel = require("../models/Treasury")
 const paymentRequestModel = require("../models/requestPay")
 const sendEmail = require("../Emails/email")
 const transactionHistories = require('../models/allTransactions')
-require('dotenv').config()
 const { requestEmail } = require("../Emails/requestPayment")
+const {payEmail} = require("../Emails/payToNoneUsers")
 const notificationModel = require('../models/notificationModel')
+const crypto = require('crypto')
 const bcrypt = require("bcrypt")
-
+require('dotenv').config()
+// const port = process.env.port
 
 
 exports.creditWalletThroughBankDeposit = async(req, res)=>{
@@ -82,9 +84,9 @@ exports.transferFromWalletToBank = async (req, res) => {
             let treasury = await treasuryModel.findOne()
 
             if (!treasury) {
-                treasury = new treasuryModel({ totalBalance: fee })
+                treasury = new treasuryModel({ Balance: fee })
             } else {
-                treasury.totalBalance += fee
+                treasury.Balance += fee
             }
 
             await treasury.save()
@@ -244,8 +246,8 @@ exports.requestForPayment = async (req, res) => {
         // Send payment request email to the receiver
         const name = `${requester.firstName.toUpperCase()} ${requester.lastName.slice(0,2).toUpperCase()}****`
         const Email = requester.email
-        const subject = `${name} requested a payment of ${amount}.`
-        const paymentLink = `https://paysphere.vercel.app/approve/${paymentRequest._id}`
+        const subject = `${name} requested a payment of ₦${amount}.`
+        const paymentLink = `https://localhost:${port}//approve/${paymentRequest._id}`
         const denyLink = `https://paysphere.vercel.app/deny/${paymentRequest._id}`
         const html = requestEmail(name, amount, paymentLink, denyLink, Email)
         await sendEmail({email:receiver.email, subject, html})
@@ -430,6 +432,68 @@ exports.getOnePaymentRequest = async (req, res) => {
         }
 
         return res.status(200).json(requestedPayment)
+    } catch (error) {
+        return res.status(500).json({
+            error: error.message
+        })
+    }
+}
+
+
+exports.sendMoneyViaEmail = async(req, res)=>{
+    try {
+        const id = req.user.userId
+        const {recipientEmail, amount} = req.body
+
+        const user = await userModel.findById(id)
+        if (!user) {
+            return res.status(404).json({
+                message: "user not found"
+            })
+        }
+        
+        if (user.wallet < amount) {
+            return res.status(400).json({
+                error: 'Insufficient funds'
+            })
+        }
+
+         const token = crypto.randomBytes(32).toString('hex')
+
+        const transaction = new paymentModel({
+            senderId: id,
+            recipientEmail: recipientEmail.toLowerCase(),
+            amount,
+            token,
+            status: 'pending'
+        })
+
+        await transaction.save()
+
+        const senderName = `${user.firstName.toUpperCase()} ${user.lastName.toUpperCase()}`
+        const senderEmail = user.email
+        const subject = `You've received ₦${amount} from ${user.firstName}`
+        const claimLink = `https://paysphere.vercel.app/signup?token=${token}`
+
+        const html = payEmail(senderName, amount, claimLink, senderEmail)
+
+        await sendEmail({ email: recipientEmail, subject, html })
+
+        res.status(200).json({
+            message: "sent",
+        })
+
+    } catch (error) {
+        return res.status(500).json({
+            error: error.message
+        })
+    }
+}
+
+
+exports.noneUserSignUp = async(req, res)=>{
+    try {
+        
     } catch (error) {
         return res.status(500).json({
             error: error.message

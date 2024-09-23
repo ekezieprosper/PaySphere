@@ -9,12 +9,15 @@ const {
     processPayment,
     denyPayment,
     getAllPaymentRequests,
-    getOnePaymentRequest } = require("../controllers/paymentController")
+    getOnePaymentRequest, 
+    sendMoneyViaEmail} = require("../controllers/paymentController")
 
 const authenticate = require("../auth/userAuth")
+const {payment} = require("../validations/validation")
 
 router.post("/credit_wallet/bank", authenticate, creditWalletThroughBankDeposit)
 router.post("/transfer_to_bank", authenticate, transferFromWalletToBank)
+router.post("/send_money_via_email", authenticate, payment, sendMoneyViaEmail)
 router.post("/request_payment", authenticate, requestForPayment)
 router.post("/approve/:paymentRequestId", processPayment)
 router.post("/deny/:paymentRequestId", denyPayment)

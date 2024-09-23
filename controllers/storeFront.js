@@ -51,13 +51,13 @@ exports.uploadProduct = async(req, res)=> {
          }
       
         const newProduct = await productModel.create({
-            productName,    
+            productName: productName.toLowerCase().charAt(0).toUpperCase() + productName.slice(1),  
             owner: id,
             price,
-            description,
+            description: description.toLowerCase().charAt(0).toUpperCase() + description.slice(1),
             availableStock, 
             productImage: Images,
-            category,
+            category: category.toLowerCase().charAt(0).toUpperCase() + category.slice(1)
         })
       
         return res.status(201).json(newProduct)
@@ -72,14 +72,6 @@ exports.uploadProduct = async(req, res)=> {
 
 exports.getAllProducts = async (req, res) => {
     try {
-        const id = req.user.userId
-
-        const user = await userModel.findById(id)
-        if (!user) {
-            return res.status(404).json({
-                message: "User not found"
-            })
-        }
 
         const allProducts = await productModel.find()
         if (allProducts.length === 0) {
@@ -113,7 +105,6 @@ exports.getAllProducts = async (req, res) => {
 
 exports.searchForProducts = async (req, res) => {
     try {
-        const id = req.user.userId
         const { searchProducts } = req.body
 
         if (!searchProducts) {
@@ -123,13 +114,6 @@ exports.searchForProducts = async (req, res) => {
         }
 
         const regex = new RegExp(searchProducts, 'i') 
-
-        const user = await userModel.findById(id)
-        if (!user) {
-            return res.status(404).json({
-                message: "User not found"
-            })
-        }
 
         const products = await productModel.find({
             $or: [
@@ -169,17 +153,10 @@ exports.searchForProducts = async (req, res) => {
 
 exports.getProductById = async(req, res)=>{
     try {
-        const id = req.user.userId
         const {productId} = req.params
 
-        const user = await userModel.findById(id)
-        if (!user) {
-            return res.status(404).json({
-                message: "User not found"
-            })
-        }
-
         const product = await productModel.findById(productId)
+
         if (!product) {
             return res.status(404).json({
                 message: "product not found"

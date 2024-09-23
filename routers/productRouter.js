@@ -11,10 +11,10 @@ const {
 const uploadFile = require("../media/productFiles")
 const authenticate = require("../auth/userAuth")
 
-router.post('/upload/product', authenticate, uploadFile.array('productImage', 10), uploadProduct)
-router.get('/get_all/products', authenticate, getAllProducts)
-router.get('/search/products', authenticate, searchForProducts)
-router.get('/get/product/:productId', authenticate, getProductById)
+router.post('/upload/product', authenticate, uploadFile.array('productImage', 5), uploadProduct)
+router.get('/get_all/products', getAllProducts)
+router.get('/search/products', searchForProducts)
+router.get('/get/product/:productId', getProductById)
 router.put('/edit/product/:productId', authenticate, updateProduct)
 router.delete('/delete/product/:productId', authenticate, deleteProduct)
 

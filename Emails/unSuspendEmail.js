@@ -1,4 +1,4 @@
-const restoreMail = (name, logIn,  supportTeam, email) => {
+const restoreMail = (name, logIn, supportTeam, email) => {
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -42,12 +42,12 @@ const restoreMail = (name, logIn,  supportTeam, email) => {
             height: auto;
         }
         .header h1 {
-            font-size: 20px; /* Smaller header text */
+            font-size: 20px;
             color: #333333;
             margin-top: 10px;
         }
         .content {
-            font-size: 14px; /* Smaller content text */
+            font-size: 14px;
             color: #333333;
         }
         .content p {
@@ -55,13 +55,13 @@ const restoreMail = (name, logIn,  supportTeam, email) => {
         }
         .unique-id {
             text-align: center;
-            font-size: 20px; /* Smaller unique ID text */
+            font-size: 20px;
             font-weight: bold;
             color: #28a745;
             margin: 20px 0;
         }
         .footer {
-            font-size: 10px; /* Smaller footer text */
+            font-size: 10px;
             color: #888888;
             text-align: center;
             margin-top: 30px;
@@ -72,32 +72,32 @@ const restoreMail = (name, logIn,  supportTeam, email) => {
             color: #888888;
             text-decoration: none;
         }
+
         @media only screen and (max-width: 600px) {
             .email-container {
                 padding: 10px;
                 box-shadow: none;
             }
             .header h1 {
-                font-size: 18px;
+                font-size: 16px; /* Smaller header text */
             }
             .content {
-                font-size: 12px;
+                font-size: 12px; /* Smaller content text */
             }
             .unique-id {
-                font-size: 18px;
+                font-size: 16px; /* Smaller unique ID text */
             }
             .footer {
-                font-size: 8px;
+                font-size: 8px; /* Smaller footer text */
+            }
+            .content p {
+                font-size: 12px; /* Smaller paragraph text */
             }
         }
     </style>
 </head>
 <body>
     <div class="email-container">
-        <div class="header">
-            <img src="logo.png" alt="PaySphere Logo">
-            <h1>Welcome to PaySphere</h1>
-        </div>
         <div class="content">
             <h2>Your account has been restored 🥳🎊</h2>
             <p><b>${name}</b>, Your account has been restored after a careful review. Please sign in to continue.</p>
@@ -113,7 +113,7 @@ const restoreMail = (name, logIn,  supportTeam, email) => {
         </footer>
     </div>
 </body>
-</html> `
-}
+</html> `;
+};
 
-module.exports = restoreMail
+module.exports = restoreMail;

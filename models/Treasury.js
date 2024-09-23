@@ -8,7 +8,7 @@ const treasurySchema = new mongoose.Schema({
         ref: 'users'
     },
     
-    totalBalance: {
+   Balance: {
         type: Number,
         default: 0
     },

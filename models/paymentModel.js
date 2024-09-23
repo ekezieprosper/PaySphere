@@ -26,6 +26,15 @@ const transferSchema = new mongoose.Schema({
         type: Number 
     },
 
+    recipientEmail: {
+      type: String
+  },
+
+  token: {
+    type: String,
+    unique: true
+  },
+
     status:{ type: String,
          enum: ['pending', 'completed', 'failed'],
          default: 'pending' 
@@ -34,7 +43,17 @@ const transferSchema = new mongoose.Schema({
     transactionDate: {
         type: String,
         default: createdOn
-    }
+    },
+
+    relatedUser: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'users'
+      },
+
+    relatedOrder: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Order'
+      },
 })
 
 

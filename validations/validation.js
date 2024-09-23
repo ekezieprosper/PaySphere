@@ -14,7 +14,7 @@ const signUp = (req, res, next) => {
       'string.pattern.base': 'Numbers and space not accepted',
     }),
 
-    email: Joi.string().email().required().messages({
+    email: Joi.string().email({ tlds: { allow: false } }).trim().required().messages({
       'string.base': 'Email must be a string',
       'string.empty': 'Email cannot be empty',
       'string.email': 'Invalid email address',
@@ -55,7 +55,7 @@ const signUp = (req, res, next) => {
 
 const forgotValidation = (req, res, next) => {
   const validateforgot = Joi.object({
-    email: Joi.string().email().required().messages({
+    email: Joi.string().email({ tlds: { allow: false } }).trim().required().messages({
       'string.base': 'Email must be a string',
       'string.empty': 'Email cannot be empty',
       'string.email': 'Invalid email address',
@@ -191,4 +191,39 @@ const transferPinValidation = (req, res, next) => {
   next()
 }
 
-module.exports = {signUp, forgotValidation,changePasswordValidation, resetPasswordValidation, loginValidation, transferPinValidation}
+
+
+const payment = (req, res, next) => {
+  const validatePayment = Joi.object({
+    email: Joi.string().email({ tlds: { allow: false } }).trim().required().messages({
+      'string.base': 'Email must be a string',
+      'string.empty': 'Email cannot be empty',
+      'string.email': 'Invalid email address',
+      'any.required': 'Email is required'
+    }),
+
+    amount: Joi.number().positive().required().messages({
+      'number.base': 'Amount must be a number',
+      'number.positive': 'Amount must be a positive number',
+      'any.required': 'Input the amount to be sent'
+    })
+})
+
+  const {email, amount} = req.body
+
+  const { error } = validatePayment.validate({email, amount}, { abortEarly: false })
+  if (error) {
+    const errors = error.details.map(detail => detail.message)
+    
+    // Send errors one by one
+    for (const errorMessage of errors) {
+    return res.status(400).json({ error: errorMessage })
+    }
+  }
+
+  next()
+}
+
+
+
+module.exports = {signUp, forgotValidation, payment, changePasswordValidation, resetPasswordValidation, loginValidation, transferPinValidation}

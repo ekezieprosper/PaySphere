@@ -5,6 +5,7 @@ const cloudinary = require("../media/cloudinary")
 const sendUniqueID = require("../Emails/userUniqueID")
 const { resetFunc } = require("../Emails/resetPasswordEmail")
 const parsePhoneNumber = require('libphonenumber-js')
+const paymentModel = require('../models/paymentModel')
 const sendEmail = require("../Emails/email")
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")
@@ -14,7 +15,7 @@ require("dotenv").config()
 
 exports.signUp_user = async (req, res) => {
     try {
-      const { firstName, lastName, email, countryCode, phoneNumber, password, confirmPassword } = req.body
+      const { firstName, lastName, email, countryCode, phoneNumber, password, confirmPassword, token } = req.body
   
       // Phone number validation
       if (!phoneNumber || !countryCode) {
@@ -57,7 +58,7 @@ exports.signUp_user = async (req, res) => {
   
       // Generate a walletID for the user
       const trimmedUserName = firstName.slice(0, 2)
-      const walletID = `${trimmedUserName.toLowerCase()}${Math.floor(Math.random() * 100000000)}`.padStart(8, '0');
+      const walletID = `${trimmedUserName.toLowerCase()}${Math.floor(Math.random() * 100000000)}`.padStart(8, '0')
 
   
       // Create the user in the database
@@ -77,6 +78,39 @@ exports.signUp_user = async (req, res) => {
         })
       }
   
+
+      if (token) {
+        const transaction = await paymentModel.findOne({token, recipientEmail: email})
+        if (!transaction) {
+            return res.status(400).json({
+                 error: 'Invalid token.' 
+            })
+        }
+
+        const sender = await userModel.findById(transaction.senderId)
+        if (!sender) {
+            return res.status(400).json({ 
+              error: 'Sender not found.' 
+            })
+        }
+
+        if (sender.wallet < transaction.amount) {
+            return res.status(400).json({ 
+             error: 'Sender has insufficient funds at the moment.' 
+            })
+        }
+        sender.wallet -= transaction.amount
+        await sender.save()
+
+        user.wallet += transaction.amount
+        await user.save()
+
+        transaction.status = 'completed'
+        transaction.recipientId = user.walletID
+        await transaction.save()
+        await paymentModel.findByIdAndDelete(transaction._id)
+    }
+
       await sendUniqueID(user, walletID)
   
       return res.status(201).json(user)
@@ -86,7 +120,7 @@ exports.signUp_user = async (req, res) => {
         error: error.message
       })
     }
-  }
+}
   
 
 exports.logIn = async (req, res) => {

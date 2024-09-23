@@ -92,7 +92,6 @@ const deleteMail = (name, supportTeam, email) => {
 <body>
        <div class="email-container">
             <div class="header">
-                <img src="https://res.cloudinary.com/da9fesl0x/image/upload/v1724452088/pj2mmfdp9conop8774ct.jpg" alt="PaySphere Logo">
                 <h1>Your account has been suspended for 365 days.</h1>
             </div>
             <div class="content">
@@ -110,4 +109,4 @@ const deleteMail = (name, supportTeam, email) => {
     `;
 }
 
-module.exports = deleteMail;
+module.exports = deleteMail
