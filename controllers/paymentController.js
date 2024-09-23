@@ -491,17 +491,6 @@ exports.sendMoneyViaEmail = async(req, res)=>{
 }
 
 
-exports.noneUserSignUp = async(req, res)=>{
-    try {
-        
-    } catch (error) {
-        return res.status(500).json({
-            error: error.message
-        })
-    }
-}
-
-
 exports.makePaymentWithUSSD = async (req, res) => {
     try {
         const { sessionId, serviceCode, phoneNumber, text } = req.body
