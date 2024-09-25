@@ -16,6 +16,10 @@ const historySchema = new mongoose.Schema({
         type:String
     },
 
+    amount:{
+        type: Number
+    },
+
     amountPaid:{
         type: Number
     },
@@ -24,24 +28,34 @@ const historySchema = new mongoose.Schema({
         type:Number,
     },
 
-    sender:{
+    receiptDetails:{
+        type:String
+    },
+    
+    senderDetails: {
         type:String
     },
 
-    recipient:{
-        type:String
-    },
+    transactionType:{
+      type:String
+   },
 
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "users"
-    },
+   creditedTo:{
+      type:String
+   },
 
-    transactions: {
+   transactionNumber: {
+    type: mongoose.Schema.Types.ObjectId
+   },
+
+   transactions: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "transactions"
     },
-
+    status:{ type: String,
+        enum: ['pending', 'successful', 'failed'],
+        default: 'pending' 
+   },
     receiptID: {
        type: mongoose.Schema.Types.ObjectId
     },

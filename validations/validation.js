@@ -29,15 +29,14 @@ const signUp = (req, res, next) => {
       'any.required': 'Password is required'
     }),
 
-    phoneNumber: Joi.string().allow('')
-    .pattern(/^\+?\d{1,4}[\s.-]?\(?\d+\)?[\d\s.-]*$/)
-    .messages({
+    phoneNumber: Joi.string().required().max(15).trim().messages({
       'string.base': 'phoneNumber must be a string',
-     'string.pattern.base': 'phoneNumber is not valid',
+      'string.empty': 'phoneNumber cannot be empty',
+      'any.required': 'phoneNumber is required'
     })
 })
 
-  const {firstName, lastName, email, password,phoneNumber } = req.body
+  const {firstName, lastName, email, password, phoneNumber } = req.body
 
   const { error } = validateSignup.validate({firstName,lastName,email,password,phoneNumber}, { abortEarly: false })
   if (error) {

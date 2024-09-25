@@ -32,6 +32,13 @@ exports.signUp_user = async (req, res) => {
         })
       }
   
+      const validateNumber = await userModel.findOne({phoneNumber: PhoneNumber})
+      if (validateNumber) {
+        return res.status(400).json({
+            error: "This phone number has already been used."
+          })
+      }
+
       // Check if passwords match
       if (password !== confirmPassword) {
         return res.status(400).json({

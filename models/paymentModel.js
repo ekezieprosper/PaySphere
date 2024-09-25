@@ -22,6 +22,10 @@ const transferSchema = new mongoose.Schema({
          type:String
     },
 
+    feeCharged:{
+      type:Number,
+  },
+
     amount:{ 
         type: Number 
     },

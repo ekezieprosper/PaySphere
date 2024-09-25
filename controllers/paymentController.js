@@ -5,18 +5,19 @@ const paymentRequestModel = require("../models/requestPay")
 const sendEmail = require("../Emails/email")
 const transactionHistories = require('../models/allTransactions')
 const { requestEmail } = require("../Emails/requestPayment")
-const {payEmail} = require("../Emails/payToNoneUsers")
+const { payEmail } = require("../Emails/payToNoneUsers")
 const notificationModel = require('../models/notificationModel')
 const crypto = require('crypto')
 const bcrypt = require("bcrypt")
 require('dotenv').config()
-// const port = process.env.port
 
 
-exports.creditWalletThroughBankDeposit = async(req, res)=>{
+
+
+exports.creditWalletThroughBankDeposit = async (req, res) => {
     try {
         const id = req.user.userId
-        const {walletID, amount} = req.body
+        const { walletID, amount } = req.body
 
         const user = await userModel.findById(id)
         if (!user) {
@@ -25,7 +26,7 @@ exports.creditWalletThroughBankDeposit = async(req, res)=>{
             })
         }
 
-        const receiver = await userModel.findOne({walletID})
+        const receiver = await userModel.findOne({ walletID })
         if (receiver) {
             const deposit = new paymentModel({
                 recipientId: walletID,
@@ -37,20 +38,20 @@ exports.creditWalletThroughBankDeposit = async(req, res)=>{
 
             receiver.wallet += amount
             await receiver.save()
-        }else{
+        } else {
             return res.status(404).json({
                 message: "Transaction failed"
             })
         }
 
-       return res.status(200).json({
+        return res.status(200).json({
             wallet: `${receiver.wallet}`
-       })
+        })
 
     } catch (error) {
         res.status(500).json({
-            error: error.message 
-       })
+            error: error.message
+        })
     }
 }
 
@@ -58,7 +59,7 @@ exports.creditWalletThroughBankDeposit = async(req, res)=>{
 exports.transferFromWalletToBank = async (req, res) => {
     try {
         const id = req.user.userId
-        const {amount} = req.body
+        const { amount } = req.body
 
         const sender = await userModel.findById(id)
         if (!sender) {
@@ -70,16 +71,17 @@ exports.transferFromWalletToBank = async (req, res) => {
         const fee = 10
 
         // Check if sender has sufficient funds
-        if (sender.wallet >= amount + fee) {  
+        if (sender.wallet >= amount + fee) {
 
             const deposit = new paymentModel({
                 senderId: id,
                 amount: amount,
+                feeCharged: fee,
                 status: 'completed'
             })
             await deposit.save()
 
-            sender.wallet -= (amount + fee)  
+            sender.wallet -= (amount + fee)
 
             let treasury = await treasuryModel.findOne()
 
@@ -102,7 +104,7 @@ exports.transferFromWalletToBank = async (req, res) => {
                 error: 'Insufficient funds'
             })
         }
-        
+
     } catch (error) {
         return res.status(500).json({
             error: error.message
@@ -111,52 +113,50 @@ exports.transferFromWalletToBank = async (req, res) => {
 }
 
 
-exports.QRcodePaymentDeposit = async(req, res)=>{
+exports.creditUser = async (req, res) => {
     try {
-        const {id, walletID, amount} = req.body
+        const { walletID, amount } = req.body
 
-        const user = await userModel.findById(id)
-        if (!user) {
-            return res.status(404).json({
-                message: "User not found"
-            })
-        }
-
-        const receiver = await userModel.findOne({walletID})
+        const receiver = await userModel.findOne({ walletID })
         if (receiver) {
+
+            receiver.wallet += amount
+            await receiver.save()
+
             const deposit = new paymentModel({
                 recipientId: walletID,
                 amount: amount,
                 status: 'completed'
-
             })
             await deposit.save()
 
-            receiver.wallet += amount
-            await receiver.save()
-        }else{
+        } else if (!receiver) {
+            return res.status(404).json({
+                message: "Recipient not found"
+            })
+        } else {
             return res.status(404).json({
                 message: "Transaction failed"
             })
         }
 
-       return res.status(200).json({
+        return res.status(200).json({
             wallet: `${receiver.wallet}`
-       })
+        })
 
     } catch (error) {
         res.status(500).json({
-            error: error.message 
-       })
+            error: error.message
+        })
     }
 }
 
 
-exports.QRcodePaymentTransfer = async (req, res) => {
+exports.debitUser = async (req, res) => {
     try {
-        const {id, amount} = req.body
+        const { walletID, amount } = req.body
 
-        const sender = await userModel.findById(id)
+        const sender = await userModel.findOne({ walletID })
         if (!sender) {
             return res.status(404).json({
                 message: "Sender not found"
@@ -166,24 +166,20 @@ exports.QRcodePaymentTransfer = async (req, res) => {
         const fee = 10
 
         // Check if sender has sufficient funds
-        if (sender.wallet >= amount + fee) {  
+        if (sender.wallet >= amount + fee) {
 
             const deposit = new paymentModel({
-                senderId: id,
+                senderId: sender._id,
                 amount: amount,
+                feeCharged: fee,
                 status: 'completed'
             })
             await deposit.save()
 
-            sender.wallet -= (amount + fee)  
+            sender.wallet -= (amount + fee)
 
-            let treasury = await treasuryModel.findOne()
-
-            if (!treasury) {
-                treasury = new treasuryModel({ Balance: fee })
-            } else {
-                treasury.Balance += fee
-            }
+            const treasury = await treasuryModel.findOne()
+            treasury.Balance += fee
 
             await treasury.save()
             await sender.save()
@@ -198,7 +194,43 @@ exports.QRcodePaymentTransfer = async (req, res) => {
                 error: 'Insufficient funds'
             })
         }
-        
+
+    } catch (error) {
+        return res.status(500).json({
+            error: error.message
+        })
+    }
+}
+
+
+exports.treasuryPercentage = async (req, res) => {
+    try {
+        const { walletID, amount } = req.body
+
+        const receiver = await userModel.findOne({ walletID })
+        if (!receiver) {
+            return res.status(404).json({
+                message: "Receiver not found"
+            })
+        }
+
+        // Calculate 15% for the treasury
+        const percentage = amount * 0.15
+        const remainingAmount = amount - percentage
+
+        const treasury = await treasuryModel.findOne()
+        treasury.Balance += percentage
+        await treasury.save()
+
+        // Add the remaining amount to the receiver's wallet
+        receiver.wallet += remainingAmount
+        await receiver.save()
+
+        return res.status(200).json({
+            message: "Transaction successful",
+            receiverAmount: remainingAmount
+        })
+
     } catch (error) {
         return res.status(500).json({
             error: error.message
@@ -219,7 +251,7 @@ exports.peer2PeerPaymentTransaction = async (req, res) => {
         }
 
         const sender = await userModel.findById(id)
-        const receiver = await userModel.findOne({walletID})
+        const receiver = await userModel.findOne({ walletID })
 
         if (!sender || !receiver) {
             return res.status(404).json({
@@ -239,7 +271,7 @@ exports.peer2PeerPaymentTransaction = async (req, res) => {
                 error: "Amount must be between 100 and above."
             })
         }
-        
+
         if (sender.wallet < amount) {
             return res.status(400).json({
                 error: 'Insufficient funds'
@@ -252,35 +284,57 @@ exports.peer2PeerPaymentTransaction = async (req, res) => {
             sender: id,
         })
 
+        const receiverName = `${receiver.firstName.toUpperCase()} ${receiver.lastName.toUpperCase()}`
+        const senderName = `${sender.firstName.toUpperCase()} ${sender.lastName.toUpperCase()}`
+
         if (!transaction) {
+            transaction.status = 'failed'
+            const receiverHistory = new transactionHistories({
+                message: `Transfer from ${senderName} failed`,
+                amount: amount,
+            })
+            await receiverHistory.save()
+            receiver.transactions.push(receiverHistory._id)
+            await receiver.save()
+
             return res.status(500).json({
                 error: 'Transaction initiation failed.'
             })
         }
 
         // Debit sender and credit receiver
-        sender.wallet -= transaction.amount
-        receiver.wallet += transaction.amount
-
-        const receiverName = `${receiver.firstName.toUpperCase()} ${receiver.lastName.slice(0,2).toUpperCase()}****`
-        const senderName = `${sender.firstName.toUpperCase()} ${sender.lastName.toUpperCase()}`
+        sender.wallet -= amount
+        receiver.wallet += amount
 
         const senderHistory = new transactionHistories({
-            message: `Transfer to ${receiverName} was successful`,
+            message: `Transfer to ${receiverName}`,
+             status: 'successful',
+            amount: amount,
             amountPaid: amount,
-            recipient: `${receiverName} | ${receiver.walletID}`,
-            user: sender._id
+            fee: 0,
+            receiptDetails: `${receiverName} | ${receiver.walletID}**`,
+            transactionType: "Transfer to PaySphere Account",
         })
         await senderHistory.save()
         sender.transactions.push(senderHistory._id)
         await sender.save()
-        
+
+        const receiverHistory = new transactionHistories({
+            message: `Transfer from ${senderName}`,
+            status: 'successful',
+            amountPaid: amount,
+            transactionType: "Wallet to wallet",
+            senderDetails: `${senderName} | ${sender.walletID}**`,
+            creditedTo: "Wallet",
+        })
+        await receiverHistory.save()
+        receiver.transactions.push(receiverHistory._id)
+        await receiver.save()
+
         const notifyReceiver = new notificationModel({
             message: `Money in from ${senderName}`,
             amountPaid: amount,
-            sender: `${senderName} | ${sender.walletID}`,
-            recipient: receiver._id,
-
+            sender: `${senderName}`
         })
         await notifyReceiver.save()
         receiver.notifications.push(notifyReceiver._id)
@@ -307,55 +361,63 @@ exports.requestForPayment = async (req, res) => {
         const requesterId = req.user.userId
         const { payerId, amount } = req.body
 
-        if (!payerId || !amount ) {
+        if (!payerId || !amount) {
             return res.status(400).json({
-                 error: "provide all required fields." 
+                error: "provide all required fields."
             })
         }
 
         // Find the requester and receiver
         const requester = await userModel.findById(requesterId)
         if (!requester) {
-            return res.status(404).json({ 
-                error: "User not found" 
+            return res.status(404).json({
+                error: "User not found"
             })
         }
 
-        const receiver = await userModel.findOne({walletID: payerId})
+        const receiver = await userModel.findOne({ walletID: payerId })
         if (!receiver) {
             return res.status(404).json({
-                 error: "Recipient not found" 
-          })
+                error: "Recipient not found"
+            })
         }
-        
-        const receiverName = `${receiver.firstName.toUpperCase()} ${receiver.lastName.slice(0,2).toUpperCase()}****`
-        
+
+        if (requester.walletID === payerId) {
+            return res.status(400).json({
+                error: "You cannot request a payment from yourself."
+            })
+        }
+
+        const receiverName = `${receiver.firstName.toUpperCase()} ${receiver.lastName.toUpperCase()}`
+
         // Create a payment request
         const paymentRequest = new paymentRequestModel({
             requesterId,
             receiverId: receiver.walletID,
             amount,
-        })
 
+        })
         await paymentRequest.save()
 
+        const paymentRequestId = paymentRequest._id
+
         // Send payment request email to the receiver
-        const name = `${requester.firstName.toUpperCase()} ${requester.lastName.slice(0,2).toUpperCase()}****`
+        const name = `${requester.firstName.toUpperCase()} ${requester.lastName.toUpperCase()}`
         const Email = requester.email
         const subject = `${name} requested a payment of ₦${amount}.`
         const paymentLink = `https://paysphere-api.vercel.app/approve/${paymentRequestId}`
-        const denyLink = `https://paysphere-api.vercel.app/deny/${paymentRequestId}`
+        const denyLink = `https://paysphere.vercel.app/deny/${paymentRequestId}`
         const html = requestEmail(name, amount, paymentLink, denyLink, Email)
-        await sendEmail({email:receiver.email, subject, html})
+        await sendEmail({ email: receiver.email, subject, html })
 
         res.status(200).json({
             message: `Request has been sent to ${receiverName}'s email`,
         })
     } catch (error) {
         res.status(500).json({
-             error: error.message
-      })
-   }
+            error: error.message
+        })
+    }
 }
 
 
@@ -365,32 +427,32 @@ exports.processPayment = async (req, res) => {
 
         const paymentRequest = await paymentRequestModel.findById(paymentRequestId)
         if (!paymentRequest) {
-            return res.status(404).json({ 
-                error: ' Request was not found' 
+            return res.status(404).json({
+                error: ' Request was not found'
             })
         }
 
         const receiver = await userModel.findOne({ walletID: paymentRequest.receiverId })
         const requester = await userModel.findById(paymentRequest.requesterId)
 
-        const receiverName = `${receiver.firstName.toUpperCase()} ${receiver.lastName.slice(0, 2).toUpperCase()}****`
+        const receiverName = `${receiver.firstName.toUpperCase()} ${receiver.lastName.toUpperCase()}`
         const requesterName = `${requester.firstName.toUpperCase()} ${requester.lastName.toUpperCase()}`
 
         // Check if the receiver has enough funds
         if (receiver.wallet < paymentRequest.amount) {
 
             // Notify the requester
-            const notification = new notificationModel({
-            message: `Payment request of ${paymentRequest.amount} to ${receiverName} failed due to the payer insufficient funds.`,
-            expectedAmount: paymentRequest.amount,
-            recipient: requester._id
-        })
-            await notification.save()
-            requester.notifications.push(notification._id)
+            const alertSender = new notificationModel({
+                message: `Payment request of ${paymentRequest.amount} to ${receiverName} failed due to the payer insufficient funds.`,
+                expectedAmount: paymentRequest.amount,
+                recipient: requester._id
+            })
+            await alertSender.save()
+            requester.notifications.push(alertSender._id)
             await requester.save()
 
-            return res.status(400).json({ 
-                error: 'Insufficient funds' 
+            return res.status(400).json({
+                error: 'Insufficient funds'
             })
         } else {
             // Deduct the amount from the receiver's account and credit the requester
@@ -413,12 +475,24 @@ exports.processPayment = async (req, res) => {
             paymentRequest.status = 'completed'
             await paymentRequest.save()
 
+            const requesterHistory = new transactionHistories({
+                message: `Transfer from ${receiverName}`,
+                status: 'successful',
+                amountPaid: paymentRequest.amount,
+                transactionType: "Wallet to wallet",
+                senderDetails: `${receiverName} | ${receiver.walletID}**`,
+                creditedTo: "Wallet",
+            })
+            await requesterHistory.save()
+            requester.transactions.push(requesterHistory._id)
+            await requester.save()
+
             // Notify the requester if successful
             const notification = new notificationModel({
                 message: `Your request for ${paymentRequest.amount} has been approved.`,
                 sender: receiverName,
                 amountPaid: paymentRequest.amount,
-               recipient: requester._id
+                recipient: requester._id
             })
             await notification.save()
             requester.notifications.push(notification._id)
@@ -426,16 +500,19 @@ exports.processPayment = async (req, res) => {
 
             // Notify the receiver (transaction history)
             const senderHistory = new transactionHistories({
-                message: `Transfer to ${requesterName} was successful`, 
-                amountPaid: paymentRequest.amount,
-                recipient: `${requesterName} | ${requester.walletID}`,
-                user: receiver._id
+                message: `Transfer to ${requesterName}`,
+                status: 'successful',
+                amount:  paymentRequest.amount,
+                amountPaid:  paymentRequest.amount,
+                fee: 0,
+                receiptDetails: `${requesterName} | ${requester.walletID}**`,
+                transactionType: "Transfer to PaySphere Account",
             })
             await senderHistory.save()
             receiver.transactions.push(senderHistory._id)
             await receiver.save()
 
-            res.status(200).json({ 
+            res.status(200).json({
                 message: 'Payment completed successfully',
                 amountPaid: paymentRequest.amount
             })
@@ -455,7 +532,7 @@ exports.denyPayment = async (req, res) => {
         const paymentRequest = await paymentRequestModel.findById(paymentRequestId)
         if (!paymentRequest) {
             return res.status(404).json({
-                error: 'Payment request not found' 
+                error: 'Payment request not found'
             })
         }
 
@@ -474,13 +551,12 @@ exports.denyPayment = async (req, res) => {
         requester.notifications.push(notification._id)
         await requester.save()
 
-
         res.status(200).json({
-            message:`Denied`
+            message: `Denied`
         })
     } catch (error) {
         res.status(500).json({
-            error: error.message 
+            error: error.message
         })
     }
 }
@@ -496,16 +572,17 @@ exports.getAllPaymentRequests = async (req, res) => {
             return res.status(200).json({
                 totalAmount_of_requestedPayment: requestedPayments.length,
                 requestedPayments
-            }) 
-      } else {
+            })
+        } else {
             return res.status(404).json({
                 message: "You haven't requested for any payment yet."
-        })       
-     }
+            })
+        }
     } catch (error) {
         return res.status(500).json({
             error: error.message
-        })    }
+        })
+    }
 }
 
 
@@ -536,10 +613,10 @@ exports.getOnePaymentRequest = async (req, res) => {
 }
 
 
-exports.sendMoneyViaEmail = async(req, res)=>{
+exports.sendMoneyViaEmail = async (req, res) => {
     try {
         const id = req.user.userId
-        const {recipientEmail, amount} = req.body
+        const { recipientEmail, amount } = req.body
 
         const user = await userModel.findById(id)
         if (!user) {
@@ -547,14 +624,14 @@ exports.sendMoneyViaEmail = async(req, res)=>{
                 message: "user not found"
             })
         }
-        
+
         if (user.wallet < amount) {
             return res.status(400).json({
                 error: 'Insufficient funds'
             })
         }
 
-         const token = crypto.randomBytes(32).toString('hex')
+        const token = crypto.randomBytes(32).toString('hex')
 
         const transaction = new paymentModel({
             senderId: id,
@@ -590,7 +667,7 @@ exports.sendMoneyViaEmail = async(req, res)=>{
 exports.makePaymentWithUSSD = async (req, res) => {
     try {
         const { sessionId, serviceCode, phoneNumber, text } = req.body
-        
+
         let response = ''
         const input = text.split('*')
 
@@ -607,22 +684,22 @@ exports.makePaymentWithUSSD = async (req, res) => {
         2. Transfer money`
         } else if (input[0] === '1') {
 
-        // Option 1: Check balance
-        response = `END Your account balance is ${user.wallet}`
+            // Option 1: Check balance
+            response = `END Your account balance is ₦${user.wallet}`
 
         } else if (input[0] === '2' && input.length === 1) {
 
-        // Option 2: Transfer - Ask for recipient's unique ID
-        response = `CON Enter recipient's walletID:`
+            // Option 2: Transfer - Ask for recipient's unique ID
+            response = `CON Enter recipient's walletID:`
 
         } else if (input[0] === '2' && input.length === 2) {
 
-        // Ask for amount to transfer
-        response = `CON Enter amount to transfer:`
+            // Ask for amount to transfer
+            response = `CON Enter amount to transfer:`
 
         } else if (input[0] === '2' && input.length === 3) {
-        // Ask for the user's transfer PIN
-        response = `CON Enter your 4-digit transfer PIN:`
+            // Ask for the user's transfer PIN
+            response = `CON Enter your 4-digit transfer PIN:`
 
         } else if (input[0] === '2' && input.length === 4) {
             // Validate the transaction
@@ -633,24 +710,49 @@ exports.makePaymentWithUSSD = async (req, res) => {
             // Validate recipient and perform the transfer
             const recipient = await userModel.findOne({ walletID: recipientID })
             if (!recipient) {
-            response = `END Recipient not found.`
+                response = `END Recipient not found.`
 
             } else if (user.wallet < amount) {
-            response = `END Insufficient funds.`
+                response = `END Insufficient funds.`
             } else {
-            // Verify the PIN
-            const isPinValid = await bcrypt.compare(pin, user.pin) 
-            if (!isPinValid) {
-                response = `END Invalid PIN.`
-           } else {
-            // Perform transfer
-            user.wallet -= amount
-            recipient.wallet += amount
-            await user.save()
-            await recipient.save()
-            response = `END Your transaction of ${amount} to ${recipient.walletID} was successful.`
-         }
-     }
+                // Verify the PIN
+                const isPinValid = await bcrypt.compare(pin, user.pin)
+                if (!isPinValid) {
+                    response = `END Invalid PIN.`
+                } else {
+                    // Perform transfer
+                    user.wallet -= amount
+                    recipient.wallet += amount
+
+                    const receiverHistory = new transactionHistories({
+                        message: `Transfer from ${user.firstName.toUpperCase()} ${user.lastName.toUpperCase()}`,
+                        status: 'successful',
+                        amountPaid: amount,
+                        transactionType: "Wallet to wallet",
+                        senderDetails: `${user.firstName.toUpperCase()} ${user.lastName.toUpperCase()} | ${user.walletID}**`,
+                        creditedTo: "Wallet",
+                    })
+                    await receiverHistory.save()
+                    recipient.transactions.push(receiverHistory._id)
+                    await recipient.save()
+
+
+                    const senderHistory = new transactionHistories({
+                        message: `Transfer to ${recipient.firstName.toUpperCase()} ${recipient.lastName.toUpperCase()}`,
+                        status: 'successful',
+                        amount: amount,
+                        amountPaid: amount,
+                        fee: 0,
+                        receiptDetails: `${recipient.firstName.toUpperCase()} ${recipient.lastName.toUpperCase()} | ${recipient.walletID}**`,
+                        transactionType: "Transfer to PaySphere Account",
+                    })
+                    await senderHistory.save()
+                    user.transactions.push(senderHistory._id)
+                    await user.save()
+
+                    response = `END Transaction successful!`
+                }
+            }
         } else {
             // Invalid option
             response = `END Invalid option.`
