@@ -20,11 +20,9 @@ const {payment} = require("../validations/validation")
 
 router.post("/credit_wallet/bank", authenticate, creditWalletThroughBankDeposit)
 router.post("/transfer_to_bank", authenticate, transferFromWalletToBank)
-
 router.post("/credit/user", creditUser)
 router.post("/debit/user", debitUser)
 router.post("/treasury/percentage", treasuryPercentage)
-
 router.post("/send_money_via_email", authenticate, payment, sendMoneyViaEmail)
 router.post("/request_payment", authenticate, requestForPayment)
 router.post("/approve/:paymentRequestId", processPayment)
