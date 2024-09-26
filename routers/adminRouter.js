@@ -14,7 +14,7 @@ const upload = require("../media/multer")
 
 
 router.post("/signup/admin", signUp)
-router.post("/image",adminAuth, upload.single('profileImg'), ProfileImgage, )
+router.post("/image",adminAuth, upload.single('profileImg'), ProfileImgage)
 router.get("/allUsers",adminAuth, getAllUsers)
 router.post("/suspend/user/:id",adminAuth, suspendUser)
 router.get("/suspended/users",adminAuth, getAllSuspendedUsers)
