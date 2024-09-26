@@ -100,7 +100,7 @@ const requestEmail = (name, amount, paymentLink, denyLink, email) => {
                                     <a href="${safePaymentLink}" class="button pay-button">Pay Now</a>
                                     <a href="${safeDenyLink}" class="button reject-button">Reject</a>
                                 </div>
-                                <p>By approving the request, the money will be deducted from your wallet and transferred to <strong>${safeName}'s</strong> wallet if you have sufficient funds.</p>
+                                <p>By approving the request, the money will be deducted from your wallet and transferred to paysphere user's wallet if you have sufficient funds.</p>
                             </td>
                         </tr>
                         <!-- Email Footer -->
