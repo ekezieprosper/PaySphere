@@ -479,7 +479,7 @@ exports.processPayment = async (req, res) => {
                 message: `Transfer from ${receiverName}`,
                 status: 'successful',
                 amountPaid: paymentRequest.amount,
-                transactionType: "Wallet to wallet",
+                transactionType: "Request payment",
                 senderDetails: `${receiverName} | ${receiver.walletID}**`,
                 creditedTo: "Wallet",
             })
@@ -728,7 +728,7 @@ exports.makePaymentWithUSSD = async (req, res) => {
                         message: `Transfer from ${user.firstName.toUpperCase()} ${user.lastName.toUpperCase()}`,
                         status: 'successful',
                         amountPaid: amount,
-                        transactionType: "Wallet to wallet",
+                        transactionType: "USSD payment",
                         senderDetails: `${user.firstName.toUpperCase()} ${user.lastName.toUpperCase()} | ${user.walletID}**`,
                         creditedTo: "Wallet",
                     })
