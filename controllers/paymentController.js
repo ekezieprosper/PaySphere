@@ -424,6 +424,7 @@ exports.requestForPayment = async (req, res) => {
 exports.processPayment = async (req, res) => {
     try {
         const { paymentRequestId } = req.params
+        const {pin} = req.body
 
         const paymentRequest = await paymentRequestModel.findById(paymentRequestId)
         if (!paymentRequest) {
@@ -437,6 +438,13 @@ exports.processPayment = async (req, res) => {
 
         const receiverName = `${receiver.firstName.toUpperCase()} ${receiver.lastName.toUpperCase()}`
         const requesterName = `${requester.firstName.toUpperCase()} ${requester.lastName.toUpperCase()}`
+
+        const checkPin = await bcrypt.compare(pin, receiver.pin)
+        if (!checkPin) {
+            return res.status(400).json({
+                error: "Incorrect transfer pin."
+            })
+        }
 
         // Check if the receiver has enough funds
         if (receiver.wallet < paymentRequest.amount) {
