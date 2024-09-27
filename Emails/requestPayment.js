@@ -8,12 +8,13 @@ const escapeHtml = (unsafe) => {
 };
 
 const formatAmount = (amount) => {
-    const num = Number(amount);
+    // Ensure the amount is a number
+    const num = Number(amount)
     if (isNaN(num)) {
-        return amount; 
+        return amount
     }
-    return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(num);
-};
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(num)
+}
 
 const requestEmail = (name, amount, paymentLink, denyLink, email) => {
     const safeName = escapeHtml(name);

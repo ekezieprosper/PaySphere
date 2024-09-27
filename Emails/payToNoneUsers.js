@@ -9,12 +9,12 @@ const escapeHtml = (unsafe) => {
 
 const formatAmount = (amount) => {
     // Ensure the amount is a number
-    const num = Number(amount);
+    const num = Number(amount)
     if (isNaN(num)) {
-        return amount; // Return as-is if not a number
+        return amount
     }
-    return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(num);
-};
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(num)
+}
 
 const payEmail = (senderName, amount, claimLink, senderEmail) => {
     const safeSenderName = escapeHtml(senderName);

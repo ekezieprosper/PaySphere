@@ -45,7 +45,7 @@ exports.creditWalletThroughBankDeposit = async (req, res) => {
         }
 
         return res.status(200).json({
-            wallet: `${receiver.wallet}`
+            wallet: `$${receiver.wallet}`
         })
 
     } catch (error) {
@@ -96,7 +96,7 @@ exports.transferFromWalletToBank = async (req, res) => {
 
             return res.status(200).json({
                 message: 'Transfer successful',
-                amountPaid: amount
+                amountPaid: `$${amount}`
             })
 
         } else {
@@ -141,7 +141,7 @@ exports.creditUser = async (req, res) => {
         }
 
         return res.status(200).json({
-            wallet: `${receiver.wallet}`
+            wallet: `$${receiver.wallet}`
         })
 
     } catch (error) {
@@ -186,7 +186,7 @@ exports.debitUser = async (req, res) => {
 
             return res.status(200).json({
                 message: 'Transfer successful',
-                amountPaid: amount
+                amountPaid: `$${amount}`
             })
 
         } else {
@@ -228,7 +228,7 @@ exports.treasuryPercentage = async (req, res) => {
 
         return res.status(200).json({
             message: "Transaction successful",
-            receiverAmount: remainingAmount
+            receiverAmount: `$${remainingAmount}`
         })
 
     } catch (error) {
@@ -350,7 +350,7 @@ exports.peer2PeerPaymentTransaction = async (req, res) => {
 
         res.status(200).json({
             message: 'Transaction Successful',
-            amountPaid: amount
+            amountPaid: `$${amount}`
         })
 
     } catch (error) {
@@ -408,7 +408,7 @@ exports.requestForPayment = async (req, res) => {
         // Send payment request email to the receiver
         const name = `${requester.firstName.toUpperCase()} ${requester.lastName.toUpperCase()}`
         const Email = requester.email
-        const subject = `${name} requested a payment of ₦${amount}.`
+        const subject = `${name} requested a payment of $${amount}.`
         const paymentLink = `https://paysphere.vercel.app/approve/${transactionId}`
         const denyLink = `https://paysphere.vercel.app/deny/${transactionId}`
         const html = requestEmail(name, amount, paymentLink, denyLink, Email)
@@ -528,7 +528,7 @@ exports.processPayment = async (req, res) => {
 
             res.status(200).json({
                 message: 'Payment completed successfully',
-                amountPaid: paymentRequest.amount
+                amountPaid: `$${paymentRequest.amount}`
             })
         }
     } catch (error) {
@@ -659,7 +659,7 @@ exports.sendMoneyViaEmail = async (req, res) => {
 
         const senderName = `${user.firstName.toUpperCase()} ${user.lastName.toUpperCase()}`
         const senderEmail = user.email
-        const subject = `You've received ₦${amount} from ${user.firstName}`
+        const subject = `You've received $${amount} from ${user.firstName}`
         const claimLink = `https://paysphere.vercel.app/signup?token=${token}`
 
         const html = payEmail(senderName, amount, claimLink, senderEmail)
@@ -699,7 +699,7 @@ exports.makePaymentWithUSSD = async (req, res) => {
         } else if (input[0] === '1') {
 
             // Option 1: Check balance
-            response = `END Your account balance is ₦${user.wallet}`
+            response = `END Your account balance is $${user.wallet}`
 
         } else if (input[0] === '2' && input.length === 1) {
 
