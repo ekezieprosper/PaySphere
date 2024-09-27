@@ -292,6 +292,7 @@ exports.peer2PeerPaymentTransaction = async (req, res) => {
             const receiverHistory = new transactionHistories({
                 message: `Transfer from ${senderName} failed`,
                 amount: amount,
+                recipient: receiver._id
             })
             await receiverHistory.save()
             receiver.transactions.push(receiverHistory._id)
@@ -314,6 +315,8 @@ exports.peer2PeerPaymentTransaction = async (req, res) => {
             fee: 0,
             receiptDetails: `${receiverName} | ${receiver.walletID}**`,
             transactionType: "Transfer to PaySphere Account",
+            recipient: sender._id
+
         })
         await senderHistory.save()
         sender.transactions.push(senderHistory._id)
@@ -326,6 +329,7 @@ exports.peer2PeerPaymentTransaction = async (req, res) => {
             transactionType: "Wallet to wallet",
             senderDetails: `${senderName} | ${sender.walletID}**`,
             creditedTo: "Wallet",
+            recipient: receiver._id
         })
         await receiverHistory.save()
         receiver.transactions.push(receiverHistory._id)
@@ -334,7 +338,8 @@ exports.peer2PeerPaymentTransaction = async (req, res) => {
         const notifyReceiver = new notificationModel({
             message: `Money in from ${senderName}`,
             amountPaid: amount,
-            sender: `${senderName}`
+            sender: `${senderName}`,
+            recipient: receiver._id
         })
         await notifyReceiver.save()
         receiver.notifications.push(notifyReceiver._id)
@@ -489,6 +494,7 @@ exports.processPayment = async (req, res) => {
                 transactionType: "Request payment",
                 senderDetails: `${receiverName} | ${receiver.walletID}**`,
                 creditedTo: "Wallet",
+                recipient: requester._id
             })
             await requesterHistory.save()
             requester.transactions.push(requesterHistory._id)
@@ -514,6 +520,7 @@ exports.processPayment = async (req, res) => {
                 fee: 0,
                 receiptDetails: `${requesterName} | ${requester.walletID}**`,
                 transactionType: "Transfer to PaySphere Account",
+                recipient: receiver._id
             })
             await senderHistory.save()
             receiver.transactions.push(senderHistory._id)
@@ -738,6 +745,7 @@ exports.makePaymentWithUSSD = async (req, res) => {
                         transactionType: "USSD payment",
                         senderDetails: `${user.firstName.toUpperCase()} ${user.lastName.toUpperCase()} | ${user.walletID}**`,
                         creditedTo: "Wallet",
+                        recipient: recipient._id
                     })
                     await receiverHistory.save()
                     recipient.transactions.push(receiverHistory._id)
@@ -752,6 +760,7 @@ exports.makePaymentWithUSSD = async (req, res) => {
                         fee: 0,
                         receiptDetails: `${recipient.firstName.toUpperCase()} ${recipient.lastName.toUpperCase()} | ${recipient.walletID}**`,
                         transactionType: "Transfer to PaySphere Account",
+                        recipient: user._id
                     })
                     await senderHistory.save()
                     user.transactions.push(senderHistory._id)

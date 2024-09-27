@@ -14,7 +14,7 @@ exports.getAllUserTransactions = async (req, res) => {
         }
 
         // Retrieve all transactions for the user
-        const transactions = await transactionHistories.find({user: id })
+        const transactions = await transactionHistories.find({recipient: id })
         if (transactions.length === 0) {
             return res.status(404).json({
                 message: "You don't have any transactions yet."
@@ -44,7 +44,7 @@ exports.getTransactionById = async (req, res) => {
         }
 
         // Check if the transaction exists and is in the user's transactions field
-        const transaction = await transactionHistories.findOne({ _id: transactionId, user: id })
+        const transaction = await transactionHistories.findOne({ _id: transactionId, recipient: id })
         if (!transaction) {
             return res.status(404).json({
                 message: "Only owner can access this transaction"
@@ -73,7 +73,7 @@ exports.deleteTransaction = async (req, res) => {
                 })
         }
 
-        const transaction = await transactionHistories.findOne({ _id: transactionId, user: id })
+        const transaction = await transactionHistories.findOne({ _id: transactionId, recipient: id })
         if (!transaction) {
             return res.status(404).json({
            message: "Unauthorized"

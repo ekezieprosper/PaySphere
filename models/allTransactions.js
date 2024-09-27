@@ -44,6 +44,11 @@ const historySchema = new mongoose.Schema({
       type:String
    },
 
+   recipient: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'users'
+  },
+
    transactionNumber: {
     type: mongoose.Schema.Types.ObjectId
    },
@@ -56,9 +61,6 @@ const historySchema = new mongoose.Schema({
         enum: ['pending', 'successful', 'failed'],
         default: 'pending' 
    },
-    receiptID: {
-       type: mongoose.Schema.Types.ObjectId
-    },
 
     date: {
         type: String,
