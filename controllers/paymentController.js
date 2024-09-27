@@ -405,8 +405,8 @@ exports.requestForPayment = async (req, res) => {
         const name = `${requester.firstName.toUpperCase()} ${requester.lastName.toUpperCase()}`
         const Email = requester.email
         const subject = `${name} requested a payment of ₦${amount}.`
-        const paymentLink = `https://paysphere-api.vercel.app/approve/${paymentRequestId}`
-        const denyLink = `https://paysphere.vercel.app/deny/${paymentRequestId}`
+        const paymentLink = `https://paysphere.vercel.app/approve/:transactionId`
+        const denyLink = `https://paysphere.vercel.app/deny/:transactionId`
         const html = requestEmail(name, amount, paymentLink, denyLink, Email)
         await sendEmail({ email: receiver.email, subject, html })
 
