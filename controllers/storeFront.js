@@ -1,6 +1,9 @@
 const productModel = require("../models/productModel")
 const userModel = require("../models/userModel")
 const cloudinary = require("../media/cloudinary")
+const orderModel = require('../models/orderModels')
+const sendEmail = require("../Emails/email")
+const { orderMailToSeller, orderMailToBuyer } = require("../Emails/orderEmail")
 const fs = require("fs")
 
 
@@ -68,6 +71,52 @@ exports.uploadProduct = async(req, res)=> {
        })
     }
 }
+
+
+exports.createOrderAndSendEmail = async (req, res) => {
+    try {
+        const { name, email, phoneNumber, cartDetails, orderId, totalAmount , sellerId} = req.body
+  
+        const seller = await userModel.findOne({ _id: sellerId })
+        if (!seller) {
+            return res.status(404).json({ 
+              message: 'Product owner not found'
+           })
+        }
+  
+        const newOrder = new orderModel({
+            buyerDetails: { name, email, phone: phoneNumber },
+            seller: sellerId,
+            cartDetails,
+            totalPrice: totalAmount,
+            orderID: orderId
+        })
+  
+        await newOrder.save()
+  
+        // send email to both buyer and the product owner
+        const sellerEmail = seller.email
+        const sellerSubject = `New Order Received`
+        const sellerHtml = orderMailToSeller({ name, email, phone: phoneNumber },cartDetails, totalAmount, orderId)
+  
+        const buyerSubject = `Order Confirmation: ${orderId}`
+        const buyerHtml = orderMailToBuyer({ name, email, phone: phoneNumber }, cartDetails, totalAmount, orderId)
+  
+        await Promise.all([
+            sendEmail({ email: sellerEmail, subject: sellerSubject, html: sellerHtml }),
+            sendEmail({ email, subject: buyerSubject, html: buyerHtml })
+        ])
+  
+        res.status(201).json({
+           message: 'New order' 
+        })
+  
+    } catch (error) {
+        res.status(500).json({
+           error: error.message 
+        })
+    }
+  }
 
 
 exports.getAllProductsOfTheUser = async (req, res) => {

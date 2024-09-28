@@ -12,25 +12,29 @@ const createdOn = `${date} ${hour}:${minute}${period}`
 
 
 const orderSchema = new mongoose.Schema({
-  firstName: {
-    type: String
+  buyerDetails: {
+    name: String,
+    email: String,
+    phone: String
+  }, 
+
+  seller: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'users' 
   },
 
-  lastname:{
-    type: String
-  },
+  cartDetails: [{ type: String }], 
 
+  totalPrice: { type: Number },
+  
+  orderID: { type: String },
 
-  status: {
-    type: String,
-    enum: ['pending', 'paid', 'cancelled'],
-    default: 'pending'
-  },
   createdAt: {
     type: String,
     default: createdOn
   }
 })
+
 
 const orderModel = mongoose.model('orders', orderSchema)
 module.exports = orderModel

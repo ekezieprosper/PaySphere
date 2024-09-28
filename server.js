@@ -8,7 +8,6 @@ const notificationRouter = require("./routers/notifications")
 const allTransactions = require("./routers/allTransactions")
 const frontStore = require("./routers/productRouter")
 const cartRouter = require("./routers/cartRouter")
-// const orderRouter = require("./routers/ordersRouter")
 
 require("./config/config")
 require("dotenv").config()
@@ -33,7 +32,6 @@ app.use(notificationRouter)
 app.use(allTransactions)
 app.use(frontStore)
 app.use(cartRouter)
-// app.use(orderRouter)
 
 
 app.get('/', (req, res) => {
