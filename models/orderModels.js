@@ -15,24 +15,31 @@ const orderSchema = new mongoose.Schema({
   buyerDetails: {
     name: String,
     email: String,
-    phone: String
-  }, 
+    phoneNumber: String,
+  },
 
   seller: { 
     type: mongoose.Schema.Types.ObjectId, 
-    ref: 'users' 
+    ref: 'users',
   },
 
-  cartDetails: [{ type: String }], 
+  cartDetails: [
+    {
+      product_name: String,
+      quantity: Number,
+      price: Number,
+    }
+  ], 
 
   totalPrice: { type: Number },
-  
+
   orderID: { type: String },
 
   createdAt: {
     type: String,
-    default: createdOn
+    default: createdOn,
   }
+
 })
 
 

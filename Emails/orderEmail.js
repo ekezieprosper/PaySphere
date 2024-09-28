@@ -1,3 +1,18 @@
+const escapeHtml = (unsafe) => {
+    if (typeof unsafe !== 'string') return '';
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+const formatAmount = (amount) => {
+    if (typeof amount !== 'number') return '';
+    return new Intl.NumberFormat('en-NG', { style: 'decimal', minimumFractionDigits: 2 }).format(amount);
+}
+
 exports.orderMailToSeller = (buyerDetails, cartDetails, totalAmount, orderID) => {
     const safeBuyerName = escapeHtml(buyerDetails.name);
     const safeBuyerEmail = escapeHtml(buyerDetails.email);

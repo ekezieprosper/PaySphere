@@ -75,48 +75,58 @@ exports.uploadProduct = async(req, res)=> {
 
 exports.createOrderAndSendEmail = async (req, res) => {
     try {
-        const { name, email, phoneNumber, cartDetails, orderId, totalAmount , sellerId} = req.body
-  
-        const seller = await userModel.findOne({ _id: sellerId })
-        if (!seller) {
-            return res.status(404).json({ 
-              message: 'Product owner not found'
-           })
-        }
-  
-        const newOrder = new orderModel({
-            buyerDetails: { name, email, phone: phoneNumber },
-            seller: sellerId,
-            cartDetails,
-            totalPrice: totalAmount,
-            orderID: orderId
+      const { name, email, phoneNumber, cart, orderId, totalAmount, sellerId } = req.body
+    
+      // Check if seller exists
+      const seller = await userModel.findOne({ _id: sellerId })
+      if (!seller) {
+        return res.status(404).json({
+             message: 'Product owner not found' 
         })
+      }
   
-        await newOrder.save()
+    //   // Create the order object
+    //   const newOrder = new orderModel({
+    //     buyerDetails: { name, email, phoneNumber },
+    //     seller: sellerId,
+    //     cartDetails: cart.map(item => ({
+    //       product_name: item.product_name,
+    //       quantity: item.quantity,
+    //       price: item.price,
+    //     })),
+    //     totalPrice: totalAmount,
+    //     orderID: orderId,
+    //   })
   
-        // send email to both buyer and the product owner
-        const sellerEmail = seller.email
-        const sellerSubject = `New Order Received`
-        const sellerHtml = orderMailToSeller({ name, email, phone: phoneNumber },cartDetails, totalAmount, orderId)
+    //   // Save the order
+    //   await newOrder.save()
   
-        const buyerSubject = `Order Confirmation: ${orderId}`
-        const buyerHtml = orderMailToBuyer({ name, email, phone: phoneNumber }, cartDetails, totalAmount, orderId)
+      // Send email to seller and buyer
+      const sellerEmail = seller.email
+      const sellerSubject = `New Order Received`
+      const sellerHtml = orderMailToSeller({ name, email, phoneNumber }, cart, totalAmount, orderId)
   
-        await Promise.all([
-            sendEmail({ email: sellerEmail, subject: sellerSubject, html: sellerHtml }),
-            sendEmail({ email, subject: buyerSubject, html: buyerHtml })
-        ])
+      const buyerSubject = `Order Confirmation: ${orderId}`
+      const buyerHtml = orderMailToBuyer({ name, email, phoneNumber }, cart, totalAmount, orderId)
   
-        res.status(201).json({
-           message: 'New order' 
-        })
+      // Send emails in parallel
+      await Promise.all([
+        sendEmail({ email: sellerEmail, subject: sellerSubject, html: sellerHtml }),
+        sendEmail({ email, subject: buyerSubject, html: buyerHtml })
+      ])
+  
+      res.status(201).json({ 
+        message: 'New order' 
+    })
   
     } catch (error) {
-        res.status(500).json({
-           error: error.message 
-        })
+      res.status(500).json({ 
+        error: error.message 
+
+      })
     }
-  }
+}
+  
 
 
 exports.getAllProductsOfTheUser = async (req, res) => {
