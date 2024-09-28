@@ -68,7 +68,7 @@ exports.transferFromWalletToBank = async (req, res) => {
             })
         }
 
-        const fee = 10
+        const fee = 1
 
         // Check if sender has sufficient funds
         if (sender.wallet >= amount + fee) {
@@ -163,7 +163,7 @@ exports.debitUser = async (req, res) => {
             })
         }
 
-        const fee = 10
+        const fee = 1
 
         // Check if sender has sufficient funds
         if (sender.wallet >= amount + fee) {
@@ -215,7 +215,7 @@ exports.treasuryPercentage = async (req, res) => {
         }
 
         // Calculate 15% for the treasury
-        const percentage = amount * 0.15
+        const percentage = amount * 0.10
         const remainingAmount = amount - percentage
 
         const treasury = await treasuryModel.findOne()
@@ -266,9 +266,9 @@ exports.peer2PeerPaymentTransaction = async (req, res) => {
             })
         }
 
-        if (amount < 100) {
+        if (amount < 5) {
             return res.status(400).json({
-                error: "Amount must be between 100 and above."
+                error: "Amount must be between $5 and above."
             })
         }
 
