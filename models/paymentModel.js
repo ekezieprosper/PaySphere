@@ -35,8 +35,7 @@ const transferSchema = new mongoose.Schema({
   },
 
   token: {
-    type: String,
-    unique: true
+    type: String
   },
 
     status:{ type: String,
