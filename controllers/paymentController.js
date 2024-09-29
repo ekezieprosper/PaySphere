@@ -68,7 +68,7 @@ exports.transferFromWalletToBank = async (req, res) => {
             })
         }
 
-        const fee = 1
+        const fee = 0.50
 
         // Check if sender has sufficient funds
         if (sender.wallet >= amount + fee) {
@@ -163,7 +163,7 @@ exports.debitUser = async (req, res) => {
             })
         }
 
-        const fee = 1
+        const fee = 0.50
 
         // Check if sender has sufficient funds
         if (sender.wallet >= amount + fee) {
@@ -214,7 +214,7 @@ exports.treasuryPercentage = async (req, res) => {
             })
         }
 
-        // Calculate 15% for the treasury
+        // Calculate 10% for the treasury
         const percentage = amount * 0.10
         const remainingAmount = amount - percentage
 
