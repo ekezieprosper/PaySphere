@@ -1,7 +1,13 @@
 const mongoose = require("mongoose")
 const countryCodes = require("../enums/countryCodes")
-const date = new Date().toLocaleString('en-NG', { day: '2-digit', month: 'short', year: 'numeric' })
-const createdOn = `${date}`
+const dateOptions = { 
+    timeZone: 'Africa/Lagos', 
+    day: '2-digit', 
+    month: 'short', 
+    year: 'numeric' 
+  }
+const createdOn = new Date().toLocaleDateString('en-NG', dateOptions)
+
 
 const userSchema = new mongoose.Schema({
     firstName: { 
