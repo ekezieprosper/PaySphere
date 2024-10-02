@@ -5,7 +5,6 @@ const dateOptions = {
   month: 'short', 
   year: 'numeric' 
 }
-
 const createdOn = new Date().toLocaleDateString('en-NG', dateOptions)
 
 
