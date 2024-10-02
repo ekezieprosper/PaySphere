@@ -309,7 +309,7 @@ exports.peer2PeerPaymentTransaction = async (req, res) => {
 
         const senderHistory = new transactionHistories({
             message: `Transfer to ${receiverName}`,
-             status: 'successful',
+            status: 'successful',
             amount: amount,
             amountPaid: amount,
             fee: 0,
