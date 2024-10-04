@@ -214,8 +214,8 @@ exports.treasuryPercentage = async (req, res) => {
             })
         }
 
-        // Calculate 5% for the treasury
-        const percentage = amount * 0.05
+        // Calculate 0.5% for the treasury
+        const percentage = amount * 0.005
         const remainingAmount = amount - percentage
 
         const treasury = await treasuryModel.findOne()
